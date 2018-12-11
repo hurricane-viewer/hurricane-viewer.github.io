@@ -2,6 +2,8 @@ body
 {
 
     font-family: "Comic Sans MS";
-	background: url('wallhaven-699110.jpg');
-
+    background: url('wallhaven-699110.jpg');
+    background-size:     cover;                     
+    background-repeat:   no-repeat;
+    /* background-position: center center;      */
 }
