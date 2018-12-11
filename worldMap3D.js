@@ -24,7 +24,7 @@ var geoGenerator = d3.geoPath()
 
 function drawFeatures(features, fill) {
   context.beginPath();
-  geoGenerator({type: 'FeatureCollection', features: features});
+  geoGenerator({ type: 'FeatureCollection', features: features });
   fill ? context.fill() : context.stroke();
 }
 
@@ -37,12 +37,12 @@ function update(t) {
   context.strokeStyle = 'black';
   drawFeatures(landGeojson.features, false);
 
-//   context.strokeStyle = '#3882bc';
-//   context.lineWidth = 0.5;
-//   drawFeatures(riversGeojson.features, false);
+  //   context.strokeStyle = '#3882bc';
+  //   context.lineWidth = 0.5;
+  //   drawFeatures(riversGeojson.features, false);
 
-//   context.fillStyle = '#3882bc';
-//   drawFeatures(lakesGeojson.features, true);
+  //   context.fillStyle = '#3882bc';
+  //   drawFeatures(lakesGeojson.features, true);
 
   window.requestAnimationFrame(update);
 }
@@ -50,10 +50,10 @@ function update(t) {
 
 
 // REQUEST DATA
-d3.json('ne.json', function(err, json) {
-  landGeojson = topojson.feature(json, json.objects.ne_50m_admin_0_countries)  
-//   riversGeojson = topojson.feature(json, json.objects.ne_10m_rivers_lake_centerlines)  
-//   lakesGeojson = topojson.feature(json, json.objects.ne_10m_lakes)
+d3.json('ne.json', function (err, json) {
+  landGeojson = topojson.feature(json, json.objects.ne_50m_admin_0_countries)
+  //   riversGeojson = topojson.feature(json, json.objects.ne_10m_rivers_lake_centerlines)  
+  //   lakesGeojson = topojson.feature(json, json.objects.ne_10m_lakes)
 
-  window.requestAnimationFrame(update); 
+  window.requestAnimationFrame(update);
 })
