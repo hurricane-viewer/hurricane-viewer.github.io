@@ -28,14 +28,21 @@ function drawFeatures(features, fill) {
   fill ? context.fill() : context.stroke();
 }
 
-function update(t) {
-  context.clearRect(0, 0, width, height);
+function draw() {
 
-  projection.rotate([-t / 1000 - 40])
+  context.clearRect(0, 0, width, height);
 
   context.lineWidth = 1;
   context.strokeStyle = 'black';
   drawFeatures(landGeojson.features, false);
+
+}
+
+function update(t) {
+
+  projection.rotate([-t / 1000 - 40])
+
+  draw();
 
   //   context.strokeStyle = '#3882bc';
   //   context.lineWidth = 0.5;
@@ -47,7 +54,16 @@ function update(t) {
   window.requestAnimationFrame(update);
 }
 
+function dragged() {
 
+  d = d3.event.x;
+
+  projection.rotate([d])
+
+  draw();
+
+
+}
 
 // REQUEST DATA
 d3.json('ne.json', function (err, json) {
@@ -55,5 +71,14 @@ d3.json('ne.json', function (err, json) {
   //   riversGeojson = topojson.feature(json, json.objects.ne_10m_rivers_lake_centerlines)  
   //   lakesGeojson = topojson.feature(json, json.objects.ne_10m_lakes)
 
-  window.requestAnimationFrame(update);
+
+  draw();
+
+  d3.select("#content").call(d3.drag().on("drag", dragged));
+
+  // var drag = d3.drag(d3.select('#content'))
+  //   .on("drag", dragged);
+
+  // window.requestAnimationFrame(update);
 })
+
