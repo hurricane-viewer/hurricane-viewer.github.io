@@ -13,9 +13,8 @@ d3.select('#content')
   .attr('width', width + 'px')
   .attr('height', height + 'px');
 
-var projection = d3.geoOrthographic()
-  .scale(0.45 * size)
-  .translate([0.5 * width, 0.5 * height]);
+var projection = d3.geoNaturalEarth1()
+  .rotate([216, 0, 0]);
 
 var geoGenerator = d3.geoPath()
   .projection(projection)
