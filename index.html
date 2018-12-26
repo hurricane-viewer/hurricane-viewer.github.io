@@ -4,7 +4,6 @@
 <head>
   <meta charset=utf-8>
   <title>Hurricanes & Typhoons</title>
-  <script src="https://d3js.org/d3.v5.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.0/topojson.min.js"></script>
@@ -13,15 +12,37 @@
 </head>
 
 <body>
-  <h1>Hurricanes & Typhoons</h1>
 
-  <p>
+  <!-- GEO HURRICANE !-->
+  <div class='dataviz' id='geohurricane'>
+  </div>
 
-    An app to visualize data on hurricanes and climate change.
+  <!-- ZOOM !-->
+  <div class='dataviz' id='geohurricane_zoom'>
+    <div id='geozoom_txt'></div>
+    <div id='geozoom_viz'></div>
+  </div>
 
-  </p>
-  <canvas id="content"></canvas>
-  <script src="worldMap3D.js"></script>
+  <!-- HURICANNE PROPERTY !-->
+  <div class='dataviz' id='hurricaneproperty'>
+  </div>
+
+  <!-- PLANET HEATING !-->
+  <div class='dataviz' id='planetheating'>
+    <div id='planetheating_viz'></div>
+    <div id='planetheating_txt'></div>
+  </div>
+
+  <!-- ------------------------------------------------------ !-->
+
+  <!-- DATAVIZ scripts !-->
+  <script src='VIZ_GeoHurricane.js'></script>
+  <script src='VIZ_HurricaneProperty.js'></script>
+  <script src='VIZ_PlanetHeating.js'></script>
+
+  <!-- MAIN SCRIPTS !-->
+  <script src='index.js'></script>
+
 </body>
 
 </html>

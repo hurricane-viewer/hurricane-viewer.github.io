@@ -1,9 +1,14 @@
-body
-{
-
-    font-family: "Comic Sans MS";
-    background: url('wallhaven-699110.jpg');
-    background-size:     cover;                     
-    background-repeat:   no-repeat;
-    /* background-position: center center;      */
+body {
+  font-family: sans-serif;
+  margin: 0px;
+  padding: 0px;
 }
+/* ------------------------------------------------------------------ */
+/* ----------------------------------------------- MAIN FRAME ------- */
+
+.dataviz {
+  width: 100%;
+}
+
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------ DATA VIZs ------- */
