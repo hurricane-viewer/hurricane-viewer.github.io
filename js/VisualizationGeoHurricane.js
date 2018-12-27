@@ -6,7 +6,7 @@ function GeoHurricane(svg) {
 
 }
 
-function GeoHurricaneZoom(svg, txtDiv) {
+function GeoHurricaneFocus(svg, txtDiv) {
 
   svg.style('background','#00f')
   txtDiv.html('DU TEXTE POur le ZoOm')
