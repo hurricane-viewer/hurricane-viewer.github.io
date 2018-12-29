@@ -51,31 +51,31 @@
     
     //Formatage
     var parseDate = d3.timeParse("%Y-%m");
-    var displayDate = d3.timeFormat("%Y");
+    var displayDate = d3.timeFormat("%m-%Y");
     var displayValue = d3.format(",.0f");
     
     //Echelle temporelle
     var x = d3.scaleTime()
         			.range([0, width - 30]);
     var xAxis = d3.axisBottom()
-        					.scale(x);
+        			.scale(x);
 		
 		//Echelle linéaire
     var y = d3.scaleLinear()
         			.range([height, height - 400]);
     var yAxis = d3.axisLeft()
-        					.scale(y);
+        			.scale(y);
 
     //Noms des axes
     svg.append("text")
       .attr("x", -25)
       .attr("y", 30)
-    	.attr("class", "axis_title")
+	  .attr("class", "axis_title")
       .text("Températures (en °C)");
     svg.append("text")
       .attr("x", width - margin.right * 5)
       .attr("y", height - margin.bottom / 2)
-    	.attr("class", "axis_title")
+	  .attr("class", "axis_title")
       .text("Temps (en années)");
 
     //Div qui servira de tooltip
@@ -87,11 +87,11 @@
     var line = d3.line()
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.value); })
-    		.curve(d3.curveBasis);
+    	.curve(d3.curveBasis);
     
     
     //Gestion des données de températures
-		d3.json("./data/temp_test.json", function(data) {
+	d3.json("./data/temp_test.json", function(data) {
 
       //Formatage d'une partie des données
       data.forEach(function(d) {
@@ -100,7 +100,7 @@
       
       //Ajustement des échelles
       x.domain(d3.extent(data, function(d) { return d.date; }));
-			y.domain([0, d3.max(data, function(d) { return d.value; })]);
+	  y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
       //Affichage des lignes
       svg.selectAll("path").data([data]).enter().append("path")
@@ -118,23 +118,24 @@
     
     
     //Gestion des données relatives aux houragans, tornades...
-		d3.json("./data/tornadoes_test.json", function(data) {
+	d3.json("./data/tornadoes_test.json", function(data) {
 
       //Formatage d'une partie des données
       data.forEach(function(d) {
-        d.date = parseDate(d.date);
+        d.date_start = parseDate(d.date_start);
+		d.date_end = parseDate(d.date_end);
       });
       
       //Ajustement des échelles
-      x.domain(d3.extent(data, function(d) { return d.date; }));
-			y.domain([0, d3.max(data, function(d) { return d.value; })]);
+      x.domain(d3.extent(data, function(d) { return d.date_start; }));
+	  y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
       //Affichage des cercles
       svg.selectAll("circle").data(data).enter()
         .append("circle")
         .style("stroke", "black")
         .attr("r", function(d) { return d.intensity * 1.5; })
-        .attr("cx", function(d) { return x(d.date); })
+        .attr("cx", function(d) { return x(d.date_start); })
         .attr("cy", function(d) { return y(d.value); })
       	
         .on("mousemove", function(d) {
@@ -142,12 +143,24 @@
           var mouse = d3.mouse(svg.node()).map(function(d) {
             return parseInt(d);
           });
+		  
+		  //Choix du placement du tooltip (gauche/droite)
+		  if (mouse[0] + 70 < 800) {
+			var mouseX = mouse[0] + 70
+		  } else {
+			var mouseX = mouse[0] - 50
+		  }
 
           //Apparition et placement
           tooltip.classed("hidden", false)
-            .attr("style", "left:" + (mouse[0] + 15) + "px; " +
+            .attr("style", "left:" + mouseX + "px; " +
                   "top:" + (mouse[1] - 35) + "px")
-          	.html(d.name + " :<br />" + displayDate(d.date) + ", " + d.intensity + ", " + d.death + ", " + d.cost);
+          	.html(d.name + " :<br />" + 
+                  displayDate(d.date_start) + "<br />" + 
+				  displayDate(d.date_end) + "<br />" + 
+                  d.intensity + "<br />" + 
+                  d.death + "<br />" + 
+                  d.cost);
         })
 
       	//Disparition du tooltip

@@ -1,15 +1,15 @@
 [
- {"id" : 1, "name": "Bertha", "value": 10, "date": "2012-01", "intensity": 1, "death": 1.5, "cost": 3},
- {"id" : 2, "name": "Bertha", "value": 30, "date": "2013-02", "intensity": 5, "death": 1.5, "cost": 3},
- {"id" : 3, "name": "Bertha", "value": 20, "date": "2014-03", "intensity": 10, "death": 1.5, "cost": 3},
- {"id" : 4, "name": "Bertha", "value": 40, "date": "2015-04", "intensity": 1, "death": 1.5, "cost": 3},
- {"id" : 5, "name": "Bertha", "value": 50, "date": "2016-05", "intensity": 10, "death": 1.5, "cost": 3},
- {"id" : 6, "name": "Bertha", "value": 20, "date": "2017-06", "intensity": 5, "death": 1.5, "cost": 3},
- {"id" : 7, "name": "Bertha", "value": 10, "date": "2018-07", "intensity": 20, "death": 1.5, "cost": 3},
- {"id" : 8, "name": "Bertha", "value": 30, "date": "2019-08", "intensity": 10, "death": 1.5, "cost": 3},
- {"id" : 9, "name": "Bertha", "value": 40, "date": "2020-09", "intensity": 1, "death": 1.5, "cost": 3},
- {"id" : 10, "name": "Bertha", "value": 60, "date": "2021-10", "intensity": 5, "death": 1.5, "cost": 3},
- {"id" : 11, "name": "Bertha", "value": 30, "date": "2022-11", "intensity": 10, "death": 1.5, "cost": 3},
- {"id" : 12, "name": "Bertha", "value": 10, "date": "2023-12", "intensity": 1, "death": 1.5, "cost": 3},
- {"id" : 13, "name": "Bertha", "value": 100, "date": "2024-01", "intensity": 15, "death": 1.5, "cost": 3}
+ {"id" : 1, "name": "Bertha", "value": 10, "date_start": "2012-01", "date_end": "2012-01", "intensity": 1, "death": 1.5, "cost": 3},
+ {"id" : 2, "name": "Bertha", "value": 30, "date_start": "2013-02", "date_end": "2013-02", "intensity": 5, "death": 1.5, "cost": 3},
+ {"id" : 3, "name": "Bertha", "value": 20, "date_start": "2014-03", "date_end": "2014-03", "intensity": 10, "death": 1.5, "cost": 3},
+ {"id" : 4, "name": "Bertha", "value": 40, "date_start": "2015-04", "date_end": "2015-04", "intensity": 1, "death": 1.5, "cost": 3},
+ {"id" : 5, "name": "Bertha", "value": 50, "date_start": "2016-05", "date_end": "2016-05", "intensity": 10, "death": 1.5, "cost": 3},
+ {"id" : 6, "name": "Bertha", "value": 20, "date_start": "2017-06", "date_end": "2017-06", "intensity": 5, "death": 1.5, "cost": 3},
+ {"id" : 7, "name": "Bertha", "value": 10, "date_start": "2018-07", "date_end": "2018-07", "intensity": 20, "death": 1.5, "cost": 3},
+ {"id" : 8, "name": "Bertha", "value": 30, "date_start": "2019-08", "date_end": "2019-08", "intensity": 10, "death": 1.5, "cost": 3},
+ {"id" : 9, "name": "Bertha", "value": 40, "date_start": "2020-09", "date_end": "2020-09", "intensity": 1, "death": 1.5, "cost": 3},
+ {"id" : 10, "name": "Bertha", "value": 60, "date_start": "2021-10", "date_end": "2021-10", "intensity": 5, "death": 1.5, "cost": 3},
+ {"id" : 11, "name": "Bertha", "value": 30, "date_start": "2022-11", "date_end": "2022-11", "intensity": 10, "death": 1.5, "cost": 3},
+ {"id" : 12, "name": "Bertha", "value": 10, "date_start": "2023-12", "date_end": "2023-12", "intensity": 1, "death": 1.5, "cost": 3},
+ {"id" : 13, "name": "Bertha", "value": 100, "date_start": "2024-01", "date_end": "2024-01", "intensity": 15, "death": 1.5, "cost": 3}
 ]
