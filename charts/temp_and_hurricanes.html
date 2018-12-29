@@ -16,6 +16,22 @@
       font-family: Arial;
       font-size: 10pt;
     }
+    
+    #tooltip {
+      	font-weight: bold;
+        color: #222;
+        background-color: #fff;
+      
+        padding: .5em;
+        text-shadow: #f5f5f5 0 1px 0;
+        border-radius: 5px;
+        opacity: 0.9;
+        position: absolute;
+    }
+    
+    .hidden {
+        display: none;
+    }
   </style>
 </head>
 
@@ -35,7 +51,7 @@
     
     //Formatage
     var parseDate = d3.timeParse("%Y-%m");
-    var displayDate = d3.timeFormat("%y");
+    var displayDate = d3.timeFormat("%Y");
     var displayValue = d3.format(",.0f");
     
     //Echelle temporelle
@@ -62,6 +78,10 @@
     	.attr("class", "axis_title")
       .text("Temps (en années)");
 
+    //Div qui servira de tooltip
+    var tooltip = d3.select("body").append("div")
+        .attr("id", "tooltip")
+        .attr("class", "hidden");
     
     // Préparation des lignes entre les données
     var line = d3.line()
@@ -70,13 +90,12 @@
     		.curve(d3.curveBasis);
     
     
-    //Gestion des données
+    //Gestion des données de températures
 		d3.json("./data/temp_test.json", function(data) {
 
-      //Parcours des données
+      //Formatage d'une partie des données
       data.forEach(function(d) {
-				d.value = +d.value;
-        d["date"] = parseDate(d["date"]);
+        d.date = parseDate(d.date);
       });
       
       //Ajustement des échelles
@@ -96,6 +115,55 @@
         .attr("transform", "translate(0,0)")
       	.call(yAxis);
     });
+    
+    
+    //Gestion des données relatives aux houragans, tornades...
+		d3.json("./data/tornadoes_test.json", function(data) {
+
+      //Formatage d'une partie des données
+      data.forEach(function(d) {
+        d.date = parseDate(d.date);
+      });
+      
+      //Ajustement des échelles
+      x.domain(d3.extent(data, function(d) { return d.date; }));
+			y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+      //Affichage des cercles
+      svg.selectAll("circle").data(data).enter()
+        .append("circle")
+        .style("stroke", "black")
+        .attr("r", function(d) { return d.intensity * 1.5; })
+        .attr("cx", function(d) { return x(d.date); })
+        .attr("cy", function(d) { return y(d.value); })
+      	
+        .on("mousemove", function(d) {
+          //Coordonnées du curseur
+          var mouse = d3.mouse(svg.node()).map(function(d) {
+            return parseInt(d);
+          });
+
+          //Apparition et placement
+          tooltip.classed("hidden", false)
+            .attr("style", "left:" + (mouse[0] + 15) + "px; " +
+                  "top:" + (mouse[1] - 35) + "px")
+          	.html(d.name + " :<br />" + displayDate(d.date) + ", " + d.intensity + ", " + d.death + ", " + d.cost);
+        })
+
+      	//Disparition du tooltip
+        .on("mouseout", function() {
+          tooltip.classed("hidden", true);
+        })
+  
+      //Mise à jour des axes
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+      svg.append("g")
+        .attr("transform", "translate(0,0)")
+      	.call(yAxis);
+    });
+    
 		
   </script>
 </body>
