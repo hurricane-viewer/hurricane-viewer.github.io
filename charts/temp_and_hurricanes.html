@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    
+    .line {
+      fill: none;
+      stroke: black;
+      stroke-width: 1.5px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    //Marges
+    var margin = {top: 20, right: 30, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    //Canvas SVG dans lequel dessiner les graphiques
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    
+    //Formatage
+    var parseDate = d3.timeParse("%Y-%m");
+    var displayDate = d3.timeFormat("%y");
+    var displayValue = d3.format(",.0f");
+    
+    //Echelle temporelle
+    var x = d3.scaleTime()
+        			.range([0, width - 30]);
+    var xAxis = d3.axisBottom()
+        					.scale(x);
+		
+		//Echelle linéaire
+    var y = d3.scaleLinear()
+        			.range([height, height - 400]);
+    var yAxis = d3.axisLeft()
+        					.scale(y);
+
+    
+    // Préparation des lignes entre les données
+    var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.value); })
+    		.curve(d3.curveBasis);
+    
+    
+    //Gestion des données
+		d3.json("./data/temp_test.json", function(data) {
+
+      //Parcours des données
+      data.forEach(function(d) {
+				d.value = +d.value;
+        d["date"] = parseDate(d["date"]);
+      });
+      
+      //Ajustement des échelles
+      x.domain(d3.extent(data, function(d) { return d.date; }));
+			y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+      //Affichage des lignes
+      svg.selectAll("path").data([data]).enter().append("path")
+        .attr("class", "line")
+        .attr("d", line);
+  
+      //Mise à jour des axes
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+      svg.append("g")
+        .attr("transform", "translate(0,0)")
+      	.call(yAxis);
+    });
+		
+  </script>
+</body>
