@@ -10,6 +10,12 @@
       stroke: black;
       stroke-width: 1.5px;
     }
+    
+    .axis_title {
+      font-weight: bold;
+      font-family: Arial;
+      font-size: 10pt;
+    }
   </style>
 </head>
 
@@ -26,7 +32,6 @@
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
     
     //Formatage
     var parseDate = d3.timeParse("%Y-%m");
@@ -44,6 +49,18 @@
         			.range([height, height - 400]);
     var yAxis = d3.axisLeft()
         					.scale(y);
+
+    //Noms des axes
+    svg.append("text")
+      .attr("x", -25)
+      .attr("y", 30)
+    	.attr("class", "axis_title")
+      .text("Températures (en °C)");
+    svg.append("text")
+      .attr("x", width - margin.right * 5)
+      .attr("y", height - margin.bottom / 2)
+    	.attr("class", "axis_title")
+      .text("Temps (en années)");
 
     
     // Préparation des lignes entre les données
