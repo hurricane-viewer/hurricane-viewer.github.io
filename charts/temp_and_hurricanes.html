@@ -51,8 +51,11 @@
     
     //Formatage
     var parseDate = d3.timeParse("%Y-%m");
-    var displayDate = d3.timeFormat("%m-%Y");
+    var displayMonth = d3.timeFormat("%m");
+	var displayYear = d3.timeFormat("%Y");
     var displayValue = d3.format(",.0f");
+	
+	var frenchMonths = ["Janvier", "Février",  "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
     
     //Echelle temporelle
     var x = d3.scaleTime()
@@ -60,7 +63,7 @@
     var xAxis = d3.axisBottom()
         			.scale(x);
 		
-		//Echelle linéaire
+	//Echelle linéaire
     var y = d3.scaleLinear()
         			.range([height, height - 400]);
     var yAxis = d3.axisLeft()
@@ -73,10 +76,10 @@
 	  .attr("class", "axis_title")
       .text("Températures (en °C)");
     svg.append("text")
-      .attr("x", width - margin.right * 5)
+      .attr("x", width - margin.right * 2.6)
       .attr("y", height - margin.bottom / 2)
 	  .attr("class", "axis_title")
-      .text("Temps (en années)");
+      .text("Années");
 
     //Div qui servira de tooltip
     var tooltip = d3.select("body").append("div")
@@ -120,10 +123,18 @@
     //Gestion des données relatives aux houragans, tornades...
 	d3.json("./data/tornadoes_test.json", function(data) {
 
-      //Formatage d'une partie des données
+      //Formatage des dates pour affichage
       data.forEach(function(d) {
         d.date_start = parseDate(d.date_start);
 		d.date_end = parseDate(d.date_end);
+		
+		let month_start = frenchMonths[parseInt(displayMonth(d.date_start)) - 1];
+		let month_end = frenchMonths[parseInt(displayMonth(d.date_end)) - 1];
+		let year_start = displayYear(d.date_start);
+		let year_end = displayYear(d.date_end);
+		
+		d.full_date_start = month_start + " " + year_start;
+		d.full_date_end = month_end + " " + year_end;
       });
       
       //Ajustement des échelles
@@ -148,7 +159,7 @@
 		  if (mouse[0] + 70 < 800) {
 			var mouseX = mouse[0] + 70
 		  } else {
-			var mouseX = mouse[0] - 50
+			var mouseX = mouse[0] - 100
 		  }
 
           //Apparition et placement
@@ -156,8 +167,8 @@
             .attr("style", "left:" + mouseX + "px; " +
                   "top:" + (mouse[1] - 35) + "px")
           	.html(d.name + " :<br />" + 
-                  displayDate(d.date_start) + "<br />" + 
-				  displayDate(d.date_end) + "<br />" + 
+                  d.full_date_start + "<br />" + 
+				  d.full_date_end + "<br />" + 
                   d.intensity + "<br />" + 
                   d.death + "<br />" + 
                   d.cost);
@@ -166,7 +177,7 @@
       	//Disparition du tooltip
         .on("mouseout", function() {
           tooltip.classed("hidden", true);
-        })
+        });
   
       //Mise à jour des axes
       svg.append("g")
