@@ -93,10 +93,18 @@
     	.curve(d3.curveBasis);
     
     
+	
+	//Blind frendly. Photocopy, LCD and print friendly
+	var red = "#de2d26";
+	var green = "#31a354";
+	var meanTemp;
+	
     //Gestion des données de températures
 	d3.json("./data/temp_test.json", function(data) {
-
-      //Formatage d'une partie des données
+      
+	  meanTemp = mean(data);
+	  
+	  //Formatage d'une partie des données
       data.forEach(function(d) {
         d.date = parseDate(d.date);
       });
@@ -117,9 +125,19 @@
       svg.append("g")
         .attr("transform", "translate(0,0)")
       	.call(yAxis);
+	
+	
+	  //Placement de la ligne de température moyenne
+	  svg.append("g")
+        .attr("transform", "translate(0, " + y(meanTemp) + ")")
+        .append("line")
+        .attr("x2", width - margin.right)
+        .style("stroke", "#aaa")
+        .style("stroke-width", "2px");
     });
     
     
+	
     //Gestion des données relatives aux houragans, tornades...
 	d3.json("./data/tornadoes_test.json", function(data) {
 
@@ -144,6 +162,7 @@
       //Affichage des cercles
       svg.selectAll("circle").data(data).enter()
         .append("circle")
+		.style("fill", function(d) { return d.value < meanTemp ? green : red; })
         .style("stroke", "black")
         .attr("r", function(d) { return d.intensity * 1.5; })
         .attr("cx", function(d) { return x(d.date_start); })
@@ -187,6 +206,22 @@
         .attr("transform", "translate(0,0)")
       	.call(yAxis);
     });
+	
+	
+	
+	
+	
+	//Calcule la moyenne des valeurs de l'attribut 'value'
+	//de l'objet JSON passé en param (températures)
+	function mean(dataset) {
+		var total = 0;
+		
+		dataset.forEach(function(d) {
+			total += d.value;
+		});
+		
+		return total / Object.keys(dataset).length;
+	}
     
 		
   </script>
