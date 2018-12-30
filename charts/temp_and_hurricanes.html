@@ -2,6 +2,7 @@
 <head>
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.min.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   <style>
     body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
     
@@ -186,11 +187,11 @@
             .attr("style", "left:" + mouseX + "px; " +
                   "top:" + (mouse[1] - 35) + "px")
           	.html(d.name + " :<br />" + 
-                  d.full_date_start + "<br />" + 
-				  d.full_date_end + "<br />" + 
-                  d.intensity + "<br />" + 
-                  d.death + "<br />" + 
-                  d.cost);
+                  '<i class="far fa-calendar"></i>' + d.full_date_start + "<br />" + 
+				  '<i class="far fa-calendar-times"></i>' + d.full_date_end + "<br />" + 
+                  '<i class="fas fa-cloud-showers-heavy"></i>' + d.intensity + "<br />" + 
+                  '<i class="fas fa-skull-crossbones"></i>' + d.death + "<br />" + 
+                  '<i class="fas fa-dollar-sign"></i>' + d.cost);
         })
 
       	//Disparition du tooltip
@@ -223,6 +224,5 @@
 		return total / Object.keys(dataset).length;
 	}
     
-		
   </script>
 </body>
