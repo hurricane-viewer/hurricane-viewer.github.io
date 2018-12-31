@@ -7,32 +7,49 @@
     body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
     
     .line {
-      fill: none;
-      stroke: black;
-      stroke-width: 1.5px;
+		fill: none;
+		stroke: black;
+		stroke-width: 1.5px;
     }
     
     .axis_title {
-      font-weight: bold;
-      font-family: Arial;
-      font-size: 10pt;
+		font-weight: bold;
+		font-family: Arial;
+		font-size: 10pt;
     }
     
     #tooltip {
       	font-weight: bold;
         color: #222;
-        background-color: #fff;
+        background-color: rgba(255,255,255,.9);
       
-        padding: .5em;
+        padding: .5em .5em .3em 0;
         text-shadow: #f5f5f5 0 1px 0;
         border-radius: 5px;
-        opacity: 0.9;
+		border: solid 2px;
         position: absolute;
     }
+	#tooltip .title {
+		text-align: center;
+		font-size: large;
+		font-weight: bold;
+		font-family: Arial;
+		
+		border-bottom: solid 2px;
+		padding-bottom: 5px;
+		margin-bottom: 5px;
+		margin-left: .5em;
+	}
     
     .hidden {
         display: none;
     }
+	
+	.icon {
+		width: 30px;
+		text-align: center;
+		padding: 4px 0px 4px 0px;
+	}
   </style>
 </head>
 
@@ -139,7 +156,7 @@
     
     
 	
-    //Gestion des données relatives aux houragans, tornades...
+    //Gestion des données relatives aux ouragans, tornades...
 	d3.json("./data/tornadoes_test.json", function(data) {
 
       //Formatage des dates pour affichage
@@ -186,12 +203,12 @@
           tooltip.classed("hidden", false)
             .attr("style", "left:" + mouseX + "px; " +
                   "top:" + (mouse[1] - 35) + "px")
-          	.html(d.name + " :<br />" + 
-                  '<i class="far fa-calendar"></i>' + d.full_date_start + "<br />" + 
-				  '<i class="far fa-calendar-times"></i>' + d.full_date_end + "<br />" + 
-                  '<i class="fas fa-cloud-showers-heavy"></i>' + d.intensity + "<br />" + 
-                  '<i class="fas fa-skull-crossbones"></i>' + d.death + "<br />" + 
-                  '<i class="fas fa-dollar-sign"></i>' + d.cost);
+          	.html('<div class="title">' + d.name + '</div>' + 
+                  '<div><i class="far fa-calendar icon"></i>' + d.full_date_start + '</div>' +
+                  '<div><i class="far fa-calendar-times icon"></i>' + d.full_date_end + '</div>' +
+                  '<div><i class="fas fa-cloud-showers-heavy icon"></i>' + d.intensity + '</div>' +
+                  '<div><i class="fas fa-skull-crossbones icon"></i>' + d.death + '</div>' +
+                  '<div><i class="fas fa-dollar-sign icon"></i>' + d.cost) + '</div>';
         })
 
       	//Disparition du tooltip
