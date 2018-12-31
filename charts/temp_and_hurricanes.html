@@ -191,8 +191,7 @@
         .attr("cx", function(d) { return x(d.date_start); })
         .attr("cy", function(d) { return y(d.value); })
       	
-		//Apparition du tooltip
-        .on("mousemove", function(d) {
+		.on("mousemove", function(d) {
           //Coordonnées du curseur
           var mouse = d3.mouse(svg.node()).map(function(d) {
             return parseInt(d);
@@ -200,16 +199,16 @@
 		  
 		  //Choix du placement du tooltip (gauche/droite)
 		  if (mouse[0] + 70 < 800) {
-			var mouseX = mouse[0] + 70
+			tooltip.attr("style", "left:" + (mouse[0] + 70) + "px; " +
+								  "top:" + (mouse[1] - 35) + "px");
 		  } else {
-			var mouseX = mouse[0] - 100
+			tooltip.attr("style", "right:" + (width - mouse[0] + 40) + "px; " +
+								  "top:" + (mouse[1] - 35) + "px");
 		  }
 
-          //Apparition et placement
-          tooltip.classed("hidden", false)
-            .attr("style", "left:" + mouseX + "px; " +
-                  "top:" + (mouse[1] - 35) + "px")
-          	.html('<div class="title">' + d.name + '</div>' + 
+		  //Apparition et contenu
+		  tooltip.classed("hidden", false)
+			.html('<div class="title">' + d.name + '</div>' + 
                   '<div><i class="far fa-calendar icon"></i>' + d.full_date_start + '</div>' +
                   '<div><i class="far fa-calendar-times icon"></i>' + d.full_date_end + '</div>' +
                   '<div><i class="fas fa-cloud-showers-heavy icon"></i>' + d.intensity + '</div>' +
