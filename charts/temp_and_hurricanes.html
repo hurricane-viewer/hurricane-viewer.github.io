@@ -4,13 +4,19 @@
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   <style>
-    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
-    
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0;
+		   background-color: #eee;}
+	
     .line {
 		fill: none;
-		stroke: black;
+		stroke: url(#temperature-gradient);
 		stroke-width: 1.5px;
     }
+	
+	#mean_line {
+		stroke: #aaa;
+		stroke-width: 2px;
+	}
     
     .axis_title {
 		font-weight: bold;
@@ -117,7 +123,7 @@
     
     
 	
-	//Blind frendly. Photocopy, LCD and print friendly
+	//Couleurs pour les cercles (Blind frendly ; photocopy, LCD et print friendly)
 	var red = "#de2d26";
 	var green = "#31a354";
 	
@@ -171,19 +177,35 @@
 	
     //Gestion des données de températures
 	function displayTemp(data, meanTemp) {
-
-      //Affichage des lignes
+	  
+	  //Préparation de la coloration de la courbe
+	  svg.append("linearGradient")
+		  .attr("id", "temperature-gradient")
+		  .attr("gradientUnits", "userSpaceOnUse")
+		  .attr("x1", 0).attr("y1", y(meanTemp - 10))
+		  .attr("x2", 0).attr("y2", y(meanTemp + 10))
+		.selectAll("stop")
+		  .data([
+				  {offset: "0%", color: "green"},
+				  {offset: "50%", color: "green"},
+				  {offset: "50%", color: "red"},
+				  {offset: "100%", color: "red"}
+				])
+		  .enter().append("stop")
+			  .attr("offset", function(d) { return d.offset; })
+			  .attr("stop-color", function(d) { return d.color; });
+	
+      //Affichage de la ligne des températures
       svg.selectAll("path").data([data]).enter().append("path")
         .attr("class", "line")
         .attr("d", line);
 	
 	  //Placement de la ligne de température moyenne
 	  svg.append("g")
+		.attr("id", "mean_line")
         .attr("transform", "translate(0, " + y(meanTemp) + ")")
         .append("line")
-        .attr("x2", width - margin.right)
-        .style("stroke", "#aaa")
-        .style("stroke-width", "2px");
+        .attr("x2", width - margin.right);
     }
     
     
