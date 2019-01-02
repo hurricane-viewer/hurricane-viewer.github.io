@@ -1,6 +1,18 @@
 'use strict'
 
-function HurricaneProperty(svg) {
+async function HurricaneProperty(svg) {
+
+  console.log('loading data...')
+  let data = await loadCsv('json/storms.csv')
+
+  console.log('croping...')
+  data = cropPeriod(data, 978307200, 1577836800)
+
+  console.log('nesting...')
+  data = nestById(data)
+
+  console.log(data)
+
 
   svg.style('background','#0f0')
 
