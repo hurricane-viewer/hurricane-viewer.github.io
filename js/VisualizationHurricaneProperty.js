@@ -11,10 +11,7 @@ async function HurricaneProperty(svg) {
   console.log('nesting...')
   data = nestById(data)
 
-  console.log(data)
-
-
-  svg.style('background','#0f0')
+  // svg.style('background','#0f0')
 
   // --------------------------------------------------------------------
   // ------------------------------------------ POSITIONNING DATA -------
