@@ -40,8 +40,8 @@ async function HurricaneProperty(svg) {
   let width = parseInt(svg.style("width").replace('px',''))
   let height = parseInt(svg.style("height").replace('px',''))
 
-  let leftMargin = 100
-  let bottomMargin = 50
+  let leftMargin = 30
+  let bottomMargin = 20
 
   let innerWidth = width - 2*leftMargin
   let innerHeight = height - 2*bottomMargin
@@ -79,6 +79,8 @@ async function HurricaneProperty(svg) {
   innerG.append("g")
      .call(y_axis);
 
+  let displayG = innerG.append('g')
+
 
   // --------------------------------------------------------------------
   // ----------------------------------------------- DISPLAY DATA -------
@@ -89,12 +91,23 @@ async function HurricaneProperty(svg) {
 
   var colorScheme = d3.scaleOrdinal(d3.schemeCategory10)
 
-  var bars = innerG.selectAll('hurricaneData')
-    .data(data).enter()
+  function displayData(data) {
+    console.log(data.length)
+
+    let displays = displayG.selectAll('path').data(data)
+
+    displays.enter()
       .append('path')
+        .merge(displays)
         .attr('stroke',function(d,i){ return colorScheme(i) })
         .attr('stroke-width',2)
         .attr('fill','none')
         .attr('d', function(d){ return lineFunction(d.winds)})
+
+    displays.exit().remove()
+
+  }
+
+  displayData(data)
 
 }
