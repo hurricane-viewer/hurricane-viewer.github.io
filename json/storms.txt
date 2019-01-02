@@ -1,0 +1,27 @@
+
+Attributes descriptions from IBTrACS v04 column documentation
+
+id :      Storm unique IBTrACS identifier.
+year :    Season
+basin :   Includes :
+           - NA: North Atlantic
+           - EP: Eastern North Pacific
+           - WP: Western North Pacific
+           - NI: North Indian
+           - SI: South Indian
+           - SP: Southern Pacific
+           - SA: South Atlantic
+name :    Storm name provided by agency or 'UNNAMED'
+time :    ISO time (UTC) of mesurea (YYYY-MM-DD HH:mm:ss)
+type :    Combined storm type, assigned based on all available storm types. Include:
+           - DS: Disturbance
+           - TS: Tropical
+           - ET: Extratropical
+           - SS: Subtropical
+           - NR: Not reported
+           - MX: Mixture (contradicting nature reports from different agencies)
+wind :    Maximum sustained wind speed (knots) from the WMO agency for the current location, or NaN
+pres :    Maximum sustained pressure (mb) from the WMO agency for the current location, or NaN
+lat :     Lattitude for mapping
+lon :     Longitude for mapping
+
