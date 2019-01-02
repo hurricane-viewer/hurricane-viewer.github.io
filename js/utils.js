@@ -2,9 +2,9 @@
 async function loadCsv(path) {
   return new Promise((ok, rej) => {
 
-    d3.csv(path,function(data) {
+    d3.csv(path, data => {
       // Add Date object form time attribute parsing (ISO 8601)
-      data.forEach(dat.timestamp = new Date(dat.time))
+      data.forEach(dat => dat.timestamp = new Date(dat.time))
 
       ok(data)
     })
