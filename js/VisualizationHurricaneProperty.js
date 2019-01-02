@@ -19,6 +19,13 @@ async function HurricaneProperty(svg) {
       fullData.push(data[datIndex])
   data = fullData
 
+  let hurricaneMap = {}
+  for(let i in data) {
+    hurricaneMap[data[i].key] = i
+  }
+
+  console.log(hurricaneMap)
+
   data.forEach(hur => {
     let beginTime = hur.values[0].timestamp/1000
     hur.values.forEach(dat => dat.timestamp = 
@@ -81,7 +88,6 @@ async function HurricaneProperty(svg) {
 
   let displayG = innerG.append('g')
 
-
   // --------------------------------------------------------------------
   // ----------------------------------------------- DISPLAY DATA -------
 
@@ -107,7 +113,27 @@ async function HurricaneProperty(svg) {
     displays.exit().remove()
 
   }
-
   displayData(data)
+
+  // --------------------------------------------------------------------
+  // -------------------------------------------- EVENT HANDELING -------
+
+  EventEngine.registerTo(EventEngine.EVT.hurricaneSelected,function(hurId) {
+    if(hurricaneMap.hasOwnProperty(hurId)) {
+      displayData([data[hurricaneMap[hurId]]])
+    }
+  })
+
+  EventEngine.registerTo(EventEngine.EVT.hurricaneUnselected,function() {
+    displayData(data)
+  })
+
+  EventEngine.registerTo(EventEngine.EVT.hurricaneMouseEnter,function() {
+    // TODO DISPLAY DATA
+  })
+
+  EventEngine.registerTo(EventEngine.EVT.hurricaneMouseExit,function() {
+    // UNDISPLAY DATA
+  })
 
 }
