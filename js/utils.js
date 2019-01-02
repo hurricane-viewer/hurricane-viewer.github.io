@@ -1,23 +1,21 @@
 
 async function loadCsv(path) {
-  return new Promise((ok,rej) => {
+  return new Promise((ok, rej) => {
+
     d3.csv(path,function(data) {
-      for(let dat of data) {
-        dat.timestamp = new Date(dat.time)
-      }
+      // Add Date object form time attribute parsing (ISO 8601)
+      data.forEach(dat.timestamp = new Date(dat.time))
+
       ok(data)
     })
   })
 }
 
-function cropPeriod(csvData, from, to) {
-  from = typeof(from)==typeof('')?(new Date(from)):from
-  to = typeof(to)==typeof('')?(new Date(to)):to
-  let corped_data = []
-  for(let dat of csvData)
-    if(dat.timestamp>=from && dat.timestamp<=to)
-      corped_data.push(dat)
-  return corped_data
+function cropPeriod(data, from, to) {
+  from = typeof(from) === 'string' ? (new Date(from)) : from
+  to = typeof(to) === 'string' ? (new Date(to)) : to
+
+  return data.filter(dat => (from <= dat.timestamp && dat.timestamp <= to))
 }
 
 function nestById(csvData) {
