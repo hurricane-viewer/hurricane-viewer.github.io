@@ -11,7 +11,7 @@ OUTPUT_FILE = 'storms.csv'
 
 # Ignore first 3 header rows ad use longitude_for_mapping and latitude_for_mapping attributes as lon & lan
 df = pd.read_csv(IBTRACS_FILE, header=None, skiprows=[0, 1, 2],
-                 usecols=[0, 1, 3, 5, 6, 7, 10, 11, 16, 17],
+                 usecols=[0, 1, 3, 5, 6, 7, 10, 11, 16, 17], parse_dates=[4],
                  names=['id', 'year', 'basin', 'name', 'time', 'type', 'wind', 'pres', 'lat', 'lon'])
 
 # Rename all unnamed storms as 'UNNAMED'
@@ -28,4 +28,4 @@ df.loc[df['pres'] == 9999., 'pres'] = np.nan
 # print(df.head())
 # print(df.dtypes)
 
-df.to_csv(OUTPUT_FILE)
+df.to_csv(OUTPUT_FILE, index=False)
