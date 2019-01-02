@@ -6,7 +6,7 @@ async function HurricaneProperty(svg) {
   let data = await loadCsv('json/storms.csv')
 
   console.log('croping...')
-  data = cropPeriod(data, 978307200, 1577836800)
+  data = cropPeriod(data, '01/01/2000', '01/01/2020')
 
   console.log('nesting...')
   data = nestById(data)
