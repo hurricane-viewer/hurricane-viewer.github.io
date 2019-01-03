@@ -91,10 +91,6 @@ async function HurricaneProperty(svg) {
 
   function displayData(data, timeData = []) {
 
-    console.log(data)
-    console.log(timeData)
-    console.log(hurricaneMap)
-
     // --- scales
     timeLengthScale
       .domain([0,d3.max(data.map(dat=>{return dat.timeLength}))])
@@ -132,7 +128,7 @@ async function HurricaneProperty(svg) {
         .transition()
         .attr('opacity',1)
 
-    circles.transition().duration(200)
+    circles
         .attr('cx',function(d,i){ return timeLengthScale(d.time) })
         .attr('cy',function(d,i){ return yScale(d.wind) })
 
@@ -169,12 +165,31 @@ async function HurricaneProperty(svg) {
       let begin = hur.beginTime
       let end = begin + hur.timeLength
       if(currentTime >= begin && currentTime <= end) {
+
         let timeForHur = currentTime - begin
-        let windData = hur.winds.filter(val=>val.time >= timeForHur)[0]
+        let afterData = hur.winds.filter(val=>val.time >= timeForHur)[0]
+        let beforeData = hur.winds.filter(val=>val.time <= timeForHur)
+        beforeData = beforeData[beforeData.length-1]
+
+        let wind = 0
+        if(afterData == beforeData)
+          wind = beforeData.wind
+        else {
+
+          let distToTime = timeForHur - beforeData.time
+          let fullTimeDist = afterData.time - beforeData.time
+
+          let ratio = distToTime / fullTimeDist
+
+          let fullWindDist = afterData.wind - beforeData.wind
+          wind = beforeData.wind + fullWindDist * ratio
+
+        }
+
         let timeObj = {
           key:hurId,
-          time:windData.time,
-          wind:windData.wind
+          time:timeForHur,
+          wind:wind
         }
         timeData.push(timeObj)
       }
@@ -246,7 +261,6 @@ async function HurricaneProperty(svg) {
   })
 
   EventEngine.registerTo(EventEngine.EVT.toTimeChange,async function(newToTime) {
-    console.log('toTime')
     toTime = newToTime
     fullHurricaneData = await loadAllData(fromTime, toTime)
     updateView()
