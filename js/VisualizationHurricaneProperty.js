@@ -2,11 +2,10 @@
 
 async function HurricaneProperty(svg) {
 
-  let array = [1,2,3,4]
-  console.log(array)
-
   let fullData = null
+  let fullHurricaneData = null
   let hurricaneMap = {}
+  let selectedHurricanes = []
   let fromTime = '01/01/1100'
   let toTime = '01/01/9000'
 
@@ -37,7 +36,7 @@ async function HurricaneProperty(svg) {
     return data
   }
 
-  let data = await loadAllData(fromTime, toTime)
+  fullHurricaneData = await loadAllData(fromTime, toTime)
 
   // --------------------------------------------------------------------
   // ------------------------------------------ POSITIONNING DATA -------
@@ -91,6 +90,9 @@ async function HurricaneProperty(svg) {
 
   function displayData(data) {
 
+    console.log(data)
+    console.log(hurricaneMap)
+
     // --- scales
     timeLengthScale
       .domain([0,d3.max(data.map(dat=>{return dat.timeLength}))])
@@ -108,49 +110,92 @@ async function HurricaneProperty(svg) {
     d3.select('.y_axis').transition().call(y_axis)
 
     // --- display
-    let displays = displayG.selectAll('path').data(data)
+    let displays = displayG.selectAll('path').data(data,function(d){return d.key})
 
     displays.enter()
       .append('path')
-        .merge(displays)
-        .attr('stroke',function(d,i){ return colorScheme(i) })
+        .attr('d', function(d){ return lineFunction(d.winds)})
         .attr('stroke-width',2)
         .attr('fill','none')
-        .attr('d', function(d){ return lineFunction(d.winds)})
+        .attr('stroke','rgba(0,0,0,0)')
+        .transition()
+        .attr('stroke',function(d,i){ return colorScheme(i) })
 
-    displays.exit().remove()
+    displays.exit()
+      .transition().duration(500)
+      .attr('stroke','rgba(0,0,0,0)')
+      .transition().delay(500)
+      .remove()
 
   }
-  displayData(data)
+
+  function updateView() {
+
+    let dispData = []
+
+    if(selectedHurricanes.length == []) {
+
+      dispData = [
+        fullHurricaneData[0],
+        fullHurricaneData[fullHurricaneData.length-1]
+      ]
+
+    }
+    else {
+
+      for(let hurId of selectedHurricanes) {
+        let hurricaneIndex = hurricaneMap[hurId]
+        dispData.push(fullHurricaneData[hurricaneIndex])
+      }
+
+    }
+
+    displayData(dispData)
+
+  }
+
+  updateView()
 
   // --------------------------------------------------------------------
   // -------------------------------------------- EVENT HANDELING -------
 
   // ----- SELECT
   EventEngine.registerTo(EventEngine.EVT.hurricaneSelected,function(hurId) {
-    if(hurricaneMap.hasOwnProperty(hurId)) {
-      displayData([data[hurricaneMap[hurId]]])
+
+    let alreadySelected = selectedHurricanes.indexOf(hurId) > -1
+    let inMap = hurricaneMap.hasOwnProperty(hurId)
+
+    if(!alreadySelected && inMap) {
+      selectedHurricanes.push(hurId)
+      updateView()
     }
+
   })
 
-  EventEngine.registerTo(EventEngine.EVT.hurricaneUnselected,function() {
-    displayData(data)
+  EventEngine.registerTo(EventEngine.EVT.hurricaneUnselected,function(hurId) {
+
+    let index = selectedHurricanes.indexOf(hurId)
+    let alreadySelected = index > -1
+
+    if(alreadySelected) {
+      selectedHurricanes.splice(index,1)
+      updateView()
+    }
+
   })
 
   // ----- TIME RANGE
   EventEngine.registerTo(EventEngine.EVT.fromTimeChange,async function(newFromTime) {
     fromTime = newFromTime
-    let data = await loadAllData(fromTime, toTime)
-    console.log(hurricaneMap)
-    console.log(data)
-    displayData(data)
+    fullHurricaneData = await loadAllData(fromTime, toTime)
+    updateView()
   })
 
   EventEngine.registerTo(EventEngine.EVT.toTimeChange,async function(newToTime) {
     console.log('toTime')
     toTime = newToTime
-    let data = await loadAllData(fromTime, toTime)
-    displayData(data)
+    fullHurricaneData = await loadAllData(fromTime, toTime)
+    updateView()
   })
 
 
