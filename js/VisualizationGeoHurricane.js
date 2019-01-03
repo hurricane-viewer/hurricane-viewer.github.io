@@ -8,39 +8,46 @@ function GeoHurricane(svg) {
 		.attr('height', height)
 		.style('background', '#fff')
 
+	let projection = d3.geoNaturalEarth1()
+		.rotate([216, 0, 0])
+		.scale(132)
+		.translate([width / 2, height / 2])
+	
+	let geoGenerator = d3.geoPath()
+		.projection(projection)
+
+	let map = svg.append('g')
+	let landPath = map.append('path').attr('class', 'land')
+	let hurricanesPath = map.append('path').attr('class', 'hurricanes')
+		.style('stroke', 'red')
+		.style('stroke-width', .5)
+		.style('fill', 'none')
+
+	let zoom = d3.zoom()
+		.scaleExtent([1, 8])
+		.translateExtent([[0, 0], [width, height]])
+		.on('zoom', _ => {
+			map.attr('transform', d3.event.transform)
+		})
+
+	svg.call(zoom)
+
 	// Load storms data
-	// loadCsv('json/storms.csv').then(data => {
-	// 	let storms = nestById(cropPeriod(data, '2000/01/01', '2020/01/01'))
-	// })
+	loadCsv('json/storms.csv').then(data => {
+		let hurricanes = nestById(cropPeriod(data, '2015/01/01', '2016/01/01'))
+		let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
+		
+		hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
+			.attr('d', geoGenerator)
+	})
 
 	// Init map
 	d3.json('json/ne.json', function (err, json) {
 		let landGeojson = topojson.feature(json, json.objects.ne_50m_admin_0_countries)
-		mapInit(landGeojson.features)
-	})
 
-	function mapInit(features) {
-		let projection = d3.geoNaturalEarth1()
-			.rotate([216, 0, 0])
-			.scale(132)
-			.translate([width / 2, height / 2])
-		
-		let geoGenerator = d3.geoPath()
-			.projection(projection)
-
-		let path = svg.append('path')
-			.datum({type: 'FeatureCollection', features: features})
+		landPath.datum({type: 'FeatureCollection', features: landGeojson.features})
 			.attr('d', geoGenerator)
-
-		let zoom = d3.zoom()
-			.scaleExtent([1, 8])
-			.translateExtent([[0, 0], [width, height]])
-			.on('zoom', _ => {
-				path.attr('transform', d3.event.transform)
-			})
-
-		svg.call(zoom)
-	}
+	})
 }
 
 function GeoHurricaneFocus(svg, txtDiv) {

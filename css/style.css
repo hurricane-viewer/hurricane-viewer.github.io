@@ -46,7 +46,7 @@ header {
   grid-area: gMap;
 }
 
-.geohurricane path {
+.geohurricane .land {
   fill: #ddd;
   stroke: #000;
   stroke-linejoin: round;
