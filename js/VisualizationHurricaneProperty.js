@@ -100,8 +100,25 @@ async function HurricaneProperty(svg) {
         return d3.max(dat.winds.map(val=>{return val.wind}))
       }))])
 
+    function timeSpent(d) {
+      if(d == 0)
+        return 'apparition'
+      else if(d<60)
+        return d+' secondes'
+      else if(d < 60*60)
+        return Math.floor(d/60) + ' minutes'
+      else if(d < 60*60*24)
+        return Math.floor(d/60/60) + ' heures'
+      else if(d < 60*60*24*7)
+        return Math.floor(d/60/60/24) + ' jours'
+      else if(d < 60*60*24*7*30)
+        return Math.floor(d/60/60/24/7) + ' semaines'
+      else if(d < 60*60*24*7*30*12)
+        return Math.floor(d/60/60/24/7/30) + ' mois'
+    }
+
     // --- axis
-    x_axis.scale(timeLengthScale)
+    x_axis.scale(timeLengthScale).tickFormat(function(d){return timeSpent(d)})
     y_axis.scale(yScale)
 
     d3.select('.x_axis').transition().call(x_axis)
@@ -201,10 +218,13 @@ async function HurricaneProperty(svg) {
   function updateView() {
     let dispData = []
     if(selectedHurricanes.length == []) {
+
+      // What to do when no selection ...
       dispData = [
         fullHurricaneData[0],
         fullHurricaneData[fullHurricaneData.length-1]
       ]
+
     }
     else {
       for(let hurId of selectedHurricanes) {
