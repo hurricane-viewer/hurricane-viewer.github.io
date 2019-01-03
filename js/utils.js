@@ -7,7 +7,11 @@ async function loadCsv(path) {
 
     d3.csv(path, data => {
       // Add Date object form time attribute parsing (ISO 8601)
-      data.forEach(dat => dat.timestamp = new Date(dat.time))
+      data.forEach(dat => {
+        dat.timestamp = new Date(dat.time)
+        dat.lat = +dat.lat
+        dat.lon = +dat.lon
+      })
 
       ok(data)
     })
