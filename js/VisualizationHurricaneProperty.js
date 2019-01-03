@@ -170,11 +170,11 @@ async function HurricaneProperty(svg) {
       let end = begin + hur.timeLength
       if(currentTime >= begin && currentTime <= end) {
         let timeForHur = currentTime - begin
-        let wind = hur.winds.filter(val=>val.time == timeForHur)[0].wind
+        let windData = hur.winds.filter(val=>val.time >= timeForHur)[0]
         let timeObj = {
           key:hurId,
-          time:timeForHur,
-          wind:wind
+          time:windData.time,
+          wind:windData.wind
         }
         timeData.push(timeObj)
       }
