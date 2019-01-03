@@ -46,6 +46,13 @@ header {
   grid-area: gMap;
 }
 
+.geohurricane path {
+  fill: #ddd;
+  stroke: #000;
+  stroke-linejoin: round;
+  stroke-width: 0.1pt;
+}
+
 
 .geofocus-txt {
   grid-area: gTxt;

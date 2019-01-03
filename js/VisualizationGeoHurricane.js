@@ -6,11 +6,12 @@ function GeoHurricane(svg) {
 
 	svg.attr('width', width)
 		.attr('height', height)
+		.style('background', '#fff')
 
 	// Load storms data
-	loadCsv('json/storms.csv').then(data => {
-		let storms = nestById(cropPeriod(data, '2000/01/01', '2020/01/01'))
-	})
+	// loadCsv('json/storms.csv').then(data => {
+	// 	let storms = nestById(cropPeriod(data, '2000/01/01', '2020/01/01'))
+	// })
 
 	// Init map
 	d3.json('json/ne.json', function (err, json) {
