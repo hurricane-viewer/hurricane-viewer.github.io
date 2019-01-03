@@ -6,6 +6,10 @@
   <title>Hurricanes & Typhoons</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.0/topojson.min.js"></script>
 
   <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -27,7 +31,13 @@
     </header>
 
     <!-- GEO HURRICANE !-->
-    <div id='geohurricane' class="geohurricane"></div>
+    <div class="geohurricane">
+      <div  id='geohurricane'></div>
+      <div class="controls">
+        <button id="geoh-btn-zoom-in">Zoom in</button>
+        <button id="geoh-btn-zoom-out">Zoom out</button>
+      </div>
+    </div>
   
     <!-- FOCUS !-->
     <div id='geofocus-txt' class="geofocus-txt"></div>
