@@ -8,6 +8,7 @@ async function HurricaneProperty(svg) {
   let selectedHurricanes = []
   let fromTime = '01/01/1100'
   let toTime = '01/01/9000'
+  let currentTime = null
 
   async function loadAllData(from='01/01/1100', to='01/01/9000') {
 
@@ -22,9 +23,9 @@ async function HurricaneProperty(svg) {
     }
 
     data.forEach(hur => {
-      let beginTime = hur.values[0].timestamp/1000
+      hur.beginTime = hur.values[0].timestamp/1000
       hur.values.forEach(dat => dat.timeFromBegin = 
-        dat.timestamp/1000 - beginTime
+        dat.timestamp/1000 - hur.beginTime
       )
       hur.timeLength = parseInt(hur.values[hur.values.length-1].timeFromBegin)
       hur.winds = hur.values.map(val => {
@@ -88,9 +89,10 @@ async function HurricaneProperty(svg) {
 
   var colorScheme = d3.scaleOrdinal(d3.schemeCategory10)
 
-  function displayData(data) {
+  function displayData(data, timeData = []) {
 
     console.log(data)
+    console.log(timeData)
     console.log(hurricaneMap)
 
     // --- scales
@@ -111,21 +113,75 @@ async function HurricaneProperty(svg) {
 
     // --- display
     let displays = displayG.selectAll('path').data(data,function(d){return d.key})
+    let circles = displayG.selectAll('circle').data(timeData,function(d){return d.key})
+
+    function getHurricaneId(key) {
+      for(let i in data)
+        if(data[i].key == key)
+          return i
+      return -1
+    }
+
+    circles.enter()
+      .append('circle')
+        .attr('cx',function(d,i){ return timeLengthScale(d.time) })
+        .attr('cy',function(d,i){ return yScale(d.wind) })
+        .attr('r',10)
+        .attr('opacity',0)
+        .attr('fill',function(d){ return colorScheme(getHurricaneId(d.key)) })
+        .transition()
+        .attr('opacity',1)
+
+    circles.transition().duration(200)
+        .attr('cx',function(d,i){ return timeLengthScale(d.time) })
+        .attr('cy',function(d,i){ return yScale(d.wind) })
 
     displays.enter()
       .append('path')
         .attr('d', function(d){ return lineFunction(d.winds)})
         .attr('stroke-width',2)
         .attr('fill','none')
-        .attr('stroke','rgba(0,0,0,0)')
-        .transition()
         .attr('stroke',function(d,i){ return colorScheme(i) })
+        .attr('opacity',0)
+        .transition()
+        .attr('opacity',1)
 
+    circles.exit()
+      .transition().duration(500)
+      .attr('opacity',0)
+      .transition().delay(500)
+      .remove()
     displays.exit()
       .transition().duration(500)
       .attr('stroke','rgba(0,0,0,0)')
       .transition().delay(500)
       .remove()
+
+  }
+
+  function createTimeData(dispData) {
+
+    if(currentTime == null)
+      return []
+
+    let timeData = []
+    for(let hur of dispData) {
+      let hurId = hur.key
+      let begin = hur.beginTime
+      let end = begin + hur.timeLength
+      console.log(begin,end,'--',currentTime)
+      if(currentTime >= begin && currentTime <= end) {
+        let timeForHur = currentTime - begin
+        let wind = hur.winds.filter(val=>val.time == timeForHur)[0].wind
+        let timeObj = {
+          key:hurId,
+          time:timeForHur,
+          wind:wind
+        }
+        timeData.push(timeObj)
+      }
+    }
+    return timeData
 
   }
 
@@ -150,7 +206,7 @@ async function HurricaneProperty(svg) {
 
     }
 
-    displayData(dispData)
+    displayData(dispData, createTimeData(dispData))
 
   }
 
@@ -184,7 +240,14 @@ async function HurricaneProperty(svg) {
 
   })
 
-  // ----- TIME RANGE
+  // ----- TIME & TIME RANGE
+  EventEngine.registerTo(EventEngine.EVT.sliderTimeChange,function(newCurrentTime) {
+
+    currentTime = newCurrentTime
+    updateView()
+
+  })
+
   EventEngine.registerTo(EventEngine.EVT.fromTimeChange,async function(newFromTime) {
     fromTime = newFromTime
     fullHurricaneData = await loadAllData(fromTime, toTime)
