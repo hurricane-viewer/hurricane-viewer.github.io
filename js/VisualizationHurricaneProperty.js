@@ -159,17 +159,15 @@ async function HurricaneProperty(svg) {
 
   }
 
+  // --------- Create time slider vizualisation data
   function createTimeData(dispData) {
-
     if(currentTime == null)
       return []
-
     let timeData = []
     for(let hur of dispData) {
       let hurId = hur.key
       let begin = hur.beginTime
       let end = begin + hur.timeLength
-      console.log(begin,end,'--',currentTime)
       if(currentTime >= begin && currentTime <= end) {
         let timeForHur = currentTime - begin
         let wind = hur.winds.filter(val=>val.time == timeForHur)[0].wind
@@ -182,34 +180,27 @@ async function HurricaneProperty(svg) {
       }
     }
     return timeData
-
   }
 
+  // --------- Generic update view method
   function updateView() {
-
     let dispData = []
-
     if(selectedHurricanes.length == []) {
-
       dispData = [
         fullHurricaneData[0],
         fullHurricaneData[fullHurricaneData.length-1]
       ]
-
     }
     else {
-
       for(let hurId of selectedHurricanes) {
         let hurricaneIndex = hurricaneMap[hurId]
         dispData.push(fullHurricaneData[hurricaneIndex])
       }
-
     }
-
     displayData(dispData, createTimeData(dispData))
-
   }
 
+  // --- First update
   updateView()
 
   // --------------------------------------------------------------------
