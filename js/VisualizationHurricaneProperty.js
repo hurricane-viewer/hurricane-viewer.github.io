@@ -6,6 +6,7 @@ async function HurricaneProperty(svg) {
   let fullHurricaneData = null
   let hurricaneMap = {}
   let selectedHurricanes = []
+  let overedHurricanes = []
   let fromTime = '01/01/1100'
   let toTime = '01/01/9000'
   let currentTime = null
@@ -23,6 +24,7 @@ async function HurricaneProperty(svg) {
     }
 
     data.forEach(hur => {
+      hur.name = hur.values[0].name
       hur.beginTime = hur.values[0].timestamp/1000
       hur.values.forEach(dat => dat.timeFromBegin = 
         dat.timestamp/1000 - hur.beginTime
@@ -89,7 +91,7 @@ async function HurricaneProperty(svg) {
 
   var colorScheme = d3.scaleOrdinal(d3.schemeCategory10)
 
-  function displayData(data, timeData = []) {
+  function displayData(data, timeData = [], overData = []) {
 
     // --- scales
     timeLengthScale
@@ -126,6 +128,7 @@ async function HurricaneProperty(svg) {
 
     // --- display
     let displays = displayG.selectAll('path').data(data,function(d){return d.key})
+    let names = displayG.selectAll('text').data(data,function(d){return d.key})
     let circles = displayG.selectAll('circle').data(timeData,function(d){return d.key})
 
     function getHurricaneId(key) {
@@ -134,6 +137,69 @@ async function HurricaneProperty(svg) {
           return i
       return -1
     }
+
+    function getStrokeWidth(key) {
+      if(overData.indexOf(key) > -1)
+        return 15
+      return 5
+    }
+
+    function getOpacity(key) {
+      if(overData.length == 0)
+        return 1
+      if(overData.indexOf(key) > -1)
+        return 1
+      return 0.2
+    }
+
+    // --- ENTER
+    displays.enter()
+      .append('path')
+        .attr('d', function(d){ return lineFunction(d.winds)})
+        .attr('fill','none')
+        .attr('stroke',function(d,i){ return colorScheme(i) })
+        .attr('stroke-width',5)
+        .attr('stroke-linecap','round')
+        .attr('opacity',0)
+        .transition()
+        .attr('opacity',1)
+
+    displays
+        .transition()
+        .attr('stroke-width',function(d) { return getStrokeWidth(d.key) })
+        .attr('opacity', function(d){ return getOpacity(d.key)})
+        .attr('d', function(d){ return lineFunction(d.winds)})
+
+    names.enter()
+      .append('text')
+        .attr('font-family','sans-serif')
+        .attr('x',function(d,i){ return timeLengthScale(d.winds[0].time) + 5})
+        .attr('y',function(d,i){ return yScale(d.winds[0].wind) + 23})
+        .attr('fill',function(d,i){ return colorScheme(i) })
+        .text(function(d){ return d.name })
+        .attr('opacity',0)
+        .transition()
+        .attr('opacity',1)
+
+    names
+        .transition()
+        .attr('opacity', function(d){ return getOpacity(d.key)})
+        .attr('x',function(d,i){ return timeLengthScale(d.winds[0].time) + 5})
+        .attr('y',function(d,i){ return yScale(d.winds[0].wind) + 23})
+
+    displayG.selectAll('path')
+        .on('click', function(d) {
+          if(selectedHurricanes.indexOf(d.key) > -1)
+            EventEngine.triggerEvent(EventEngine.EVT.hurricaneUnselected,d.key)
+          else
+            EventEngine.triggerEvent(EventEngine.EVT.hurricaneSelected,d.key)
+        })
+        .on('mouseover',function(d) {
+          EventEngine.triggerEvent(EventEngine.EVT.hurricaneMouseEnter,d.key)
+        })
+        .on('mouseout',function(d) {
+          EventEngine.triggerEvent(EventEngine.EVT.hurricaneMouseExit,d.key)
+        })
 
     circles.enter()
       .append('circle')
@@ -144,31 +210,24 @@ async function HurricaneProperty(svg) {
         .attr('fill',function(d){ return colorScheme(getHurricaneId(d.key)) })
         .transition()
         .attr('opacity',1)
-
     circles
         .attr('cx',function(d,i){ return timeLengthScale(d.time) })
         .attr('cy',function(d,i){ return yScale(d.wind) })
 
-    displays.enter()
-      .append('path')
-        .attr('d', function(d){ return lineFunction(d.winds)})
-        .attr('stroke-width',2)
-        .attr('fill','none')
-        .attr('stroke',function(d,i){ return colorScheme(i) })
+    // --- EXIT
+    
+    let exitDuration = 100
+    function exitFunc(elm) {
+      elm
+        .transition().duration(exitDuration)
         .attr('opacity',0)
-        .transition()
-        .attr('opacity',1)
+        .transition().delay(exitDuration)
+        .remove()
+    }
 
-    circles.exit()
-      .transition().duration(500)
-      .attr('opacity',0)
-      .transition().delay(500)
-      .remove()
-    displays.exit()
-      .transition().duration(500)
-      .attr('stroke','rgba(0,0,0,0)')
-      .transition().delay(500)
-      .remove()
+    displays.exit().call(exitFunc)
+    names.exit().call(exitFunc)
+    circles.exit().call(exitFunc)
 
   }
 
@@ -220,10 +279,15 @@ async function HurricaneProperty(svg) {
     if(selectedHurricanes.length == []) {
 
       // What to do when no selection ...
-      dispData = [
-        fullHurricaneData[0],
-        fullHurricaneData[fullHurricaneData.length-1]
-      ]
+      if(fullHurricaneData.length > 10) {
+        dispData = [
+          fullHurricaneData[0],
+          fullHurricaneData[fullHurricaneData.length-1]
+        ]
+      }
+      else {
+        dispData = fullHurricaneData
+      }
 
     }
     else {
@@ -232,7 +296,7 @@ async function HurricaneProperty(svg) {
         dispData.push(fullHurricaneData[hurricaneIndex])
       }
     }
-    displayData(dispData, createTimeData(dispData))
+    displayData(dispData, createTimeData(dispData), overedHurricanes)
   }
 
   // --- First update
@@ -288,12 +352,27 @@ async function HurricaneProperty(svg) {
 
 
   // ----- HOVER
-  EventEngine.registerTo(EventEngine.EVT.hurricaneMouseEnter,function() {
-    // TODO DISPLAY DATA
+  EventEngine.registerTo(EventEngine.EVT.hurricaneMouseEnter,function(hurId) {
+
+    let alreadyOvered = overedHurricanes.indexOf(hurId) > -1
+    let inMap = hurricaneMap.hasOwnProperty(hurId)
+
+    if(!alreadyOvered && inMap) {
+      overedHurricanes.push(hurId)
+      updateView()
+    }
+
   })
 
-  EventEngine.registerTo(EventEngine.EVT.hurricaneMouseExit,function() {
-    // UNDISPLAY DATA
+  EventEngine.registerTo(EventEngine.EVT.hurricaneMouseExit,function(hurId) {
+
+    let index = overedHurricanes.indexOf(hurId)
+    let alreadyOvered = index > -1
+
+    if(alreadyOvered) {
+      overedHurricanes.splice(index,1)
+      updateView()
+    }
   })
 
 }
