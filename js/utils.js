@@ -36,6 +36,7 @@ class EventEngine {
   // ----------------------- ALL EVENTS (non-exhaustive list)
   static get EVT() {
     return {
+      sliderTimeChange:-1, // args: timestamp
       fromTimeChange:0, // args: timestamp
       toTimeChange:1, // args: timestamp
       hurricaneSelected:2, // args: hurricaneId
