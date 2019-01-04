@@ -27,8 +27,11 @@ function GeoHurricane(svg) {
 		.on('zoom', _ => {
 			map.attr('transform', d3.event.transform)
 		})
-
 	svg.call(zoom)
+
+	let color = d3.scaleLinear().domain([0, 150])
+		.interpolate(d3.interpolateHcl)
+		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
 
 	// Load storms data
 	loadCsv('json/storms.csv').then(data => {
@@ -48,8 +51,8 @@ function GeoHurricane(svg) {
 				.enter()
 				.append('circle')
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
-					.attr('r', 1)
-					.attr('fill', 'red')
+					.attr('r', d => 1 + d.wind / 100)
+					.attr('fill', d => color(d.wind))
 
 	})
 
