@@ -23,7 +23,7 @@ function GeoHurricane(svg) {
 		.style('stroke', '#000')
 		.style('stroke-width', 1)
 		.style('fill', 'none')
-		.style('opacity', .15)
+		.style('opacity', .1)
 	let hurricanesPoints = map.append('g')
 
 	let zoom = d3.zoom()
@@ -40,24 +40,45 @@ function GeoHurricane(svg) {
 
 	// Load storms data
 	loadCsv('json/storms.csv').then(data => {
-		let hurricanes = nestById(cropPeriod(data, '2016/01/01', '2020/01/01'))
+		let from = '2016/07/01'
+		let to = '2020/01/01'
+
+		let hurricanes = nestById(cropPeriod(data, from, to))
 		let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
 		
 		hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
 			.attr('d', geoGenerator)
-		
-		hurricanesPoints
-			.selectAll('g')
-			.data(hurricanes)
-			.enter()
-			.append('g')
+
+		let date = new Date(from)
+		let addTime = setInterval(_ => {
+			date.setTime(date.getTime() + 30000000)
+			update()
+			
+			if (date > to) clearInterval(addTime)
+		}, 40)
+
+		function update() {
+			let h = hurricanesPoints
+				.selectAll('g')
+				.data(hurricanes)
+
+			h.enter()
+				.append('g')
 				.selectAll('circle')
 				.data(h => h.values)
 				.enter()
-				.append('circle')
+					.append('circle')
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
 					.attr('r', d => .5 + d.wind / 100)
 					.attr('fill', d => d.wind ? color(d.wind) : '#999')
+					.attr('visibility', 'hidden')
+
+			h.selectAll('circle')
+				.attr('visibility', d => (d.timestamp <= date) ? 'visible' : 'hidden')
+			
+			h.exit().remove()
+
+		}
 	})
 
 	// Init map
