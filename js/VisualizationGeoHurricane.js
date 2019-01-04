@@ -1,16 +1,17 @@
-'use strict';
+'use strict'
 
 function GeoHurricane(svg) {
 	let width = 720,
-		height = 480;
+		height = 480
 
-	svg.attr('width', width)
-		.attr('height', height)
-		.style('background', '#fff')
+	resize()
 
-	let projection = d3.geoNaturalEarth1()
-		.rotate([216, 0, 0])
-		.scale(132)
+	svg.style('background', '#fff')
+
+	// let projection = d3.geoNaturalEarth1()
+	let projection = d3.geoCylindricalStereographic()
+		.rotate([200, 0, 0]) // Center on the pacific ocean
+		.scale(150)
 		.translate([width / 2, height / 2])
 	
 	let geoGenerator = d3.geoPath()
@@ -48,6 +49,16 @@ function GeoHurricane(svg) {
 		landPath.datum({type: 'FeatureCollection', features: landGeojson.features})
 			.attr('d', geoGenerator)
 	})
+
+	function resize () {
+		width = document.querySelector('.container').offsetWidth
+		height = Math.max(window.innerHeight - document.querySelector('header').offsetHeight, 480)
+
+		svg.attr('width', width)
+			.attr('height', height)
+	}
+
+	window.addEventListener('resize', resize)
 }
 
 function GeoHurricaneFocus(svg, txtDiv) {
