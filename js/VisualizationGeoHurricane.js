@@ -19,7 +19,12 @@ function GeoHurricane(svg) {
 
 	let map = svg.append('g')
 	let landPath = map.append('path').attr('class', 'land')
-	let hurricanesPath = map.append('g').attr('class', 'hurricanes')
+	let hurricanesPath = map.append('path').attr('class', 'hurricanes')
+		.style('stroke', '#000')
+		.style('stroke-width', 1)
+		.style('fill', 'none')
+		.style('opacity', .15)
+	let hurricanesPoints = map.append('g')
 
 	let zoom = d3.zoom()
 		.scaleExtent([1, 8])
@@ -29,19 +34,19 @@ function GeoHurricane(svg) {
 		})
 	svg.call(zoom)
 
-	let color = d3.scaleLinear().domain([0, 150])
+	let color = d3.scaleLinear().domain([0, 140])
 		.interpolate(d3.interpolateHcl)
 		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
 
 	// Load storms data
 	loadCsv('json/storms.csv').then(data => {
-		let hurricanes = nestById(cropPeriod(data, '2015/01/01', '2016/01/01'))
-		// let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
+		let hurricanes = nestById(cropPeriod(data, '2016/01/01', '2020/01/01'))
+		let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
 		
-		// hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
-		// 	.attr('d', geoGenerator)
-
-		hurricanesPath
+		hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
+			.attr('d', geoGenerator)
+		
+		hurricanesPoints
 			.selectAll('g')
 			.data(hurricanes)
 			.enter()
@@ -51,9 +56,8 @@ function GeoHurricane(svg) {
 				.enter()
 				.append('circle')
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
-					.attr('r', d => 1 + d.wind / 100)
-					.attr('fill', d => color(d.wind))
-
+					.attr('r', d => .5 + d.wind / 100)
+					.attr('fill', d => d.wind ? color(d.wind) : '#999')
 	})
 
 	// Init map
