@@ -19,10 +19,7 @@ function GeoHurricane(svg) {
 
 	let map = svg.append('g')
 	let landPath = map.append('path').attr('class', 'land')
-	let hurricanesPath = map.append('path').attr('class', 'hurricanes')
-		.style('stroke', 'red')
-		.style('stroke-width', .5)
-		.style('fill', 'none')
+	let hurricanesPath = map.append('g').attr('class', 'hurricanes')
 
 	let zoom = d3.zoom()
 		.scaleExtent([1, 8])
@@ -36,10 +33,24 @@ function GeoHurricane(svg) {
 	// Load storms data
 	loadCsv('json/storms.csv').then(data => {
 		let hurricanes = nestById(cropPeriod(data, '2015/01/01', '2016/01/01'))
-		let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
+		// let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
 		
-		hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
-			.attr('d', geoGenerator)
+		// hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
+		// 	.attr('d', geoGenerator)
+
+		hurricanesPath
+			.selectAll('g')
+			.data(hurricanes)
+			.enter()
+			.append('g')
+				.selectAll('circle')
+				.data(h => h.values)
+				.enter()
+				.append('circle')
+					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
+					.attr('r', 1)
+					.attr('fill', 'red')
+
 	})
 
 	// Init map
