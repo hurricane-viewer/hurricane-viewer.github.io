@@ -59,7 +59,23 @@ function GeoHurricane(svg) {
 
 			function filterHurricanes(season) {
 				hurricanesPoints
-					.selectAll('g')
+					.append('g')
+					.attr('class', `season-${season}`)
+
+				hurricanesPoints
+					.select(`.season-${season - 1}`)
+					.style('opacity', .8)
+				hurricanesPoints
+					.select(`.season-${season - 2}`)
+					.style('opacity', .6)
+				hurricanesPoints
+					.select(`.season-${season - 3}`)
+					.style('opacity', .4)
+				hurricanesPoints
+					.select(`.season-${season - 4}`)
+					.style('opacity', .2)
+				hurricanesPoints
+					.select(`.season-${season - 5}`)
 					.remove()
 
 				hurricanesPath
@@ -82,7 +98,7 @@ function GeoHurricane(svg) {
 				let addTime = setInterval(_ => {
 					date.setTime(date.getTime() + 100000000)
 	
-					updateHurricanes()
+					updateHurricanes(season)
 					
 					if (date >= endDate) {
 						clearInterval(addTime)
@@ -94,8 +110,9 @@ function GeoHurricane(svg) {
 			playSeason(startYear)
 		}
 
-		function updateHurricanes() {
+		function updateHurricanes(season) {
 			let h = hurricanesPoints
+				.select(`.season-${season}`)
 				.selectAll('g')
 				.data(displayed)
 
