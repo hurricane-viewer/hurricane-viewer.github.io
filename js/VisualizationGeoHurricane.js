@@ -18,6 +18,7 @@ function GeoHurricane(svg) {
 		.projection(projection)
 
 	let map = svg.append('g')
+
 	let landPath = map.append('path').attr('class', 'land')
 	let hurricanesPath = map.append('path').attr('class', 'hurricanes')
 		.style('stroke', '#000')
@@ -41,34 +42,62 @@ function GeoHurricane(svg) {
 
 	// Load storms data
 	loadCsv('json/storms.csv').then(data => {
-		let from = '2016/07/01'
-		let to = '2020/01/01'
+		let yearStart = 1975
+		let yearEnd = 2018
 
-		let hurricanes = nestById(cropPeriod(data, from, to))
-		let coordinates = hurricanes.map(h => h.values.map(d => [d.lon, d.lat]))
-		
-		hurricanesPath.datum({type: 'MultiLineString', coordinates: coordinates})
-			.attr('d', geoGenerator)
-
-		let date = new Date(from)
-		let addTime = setInterval(_ => {
-			date.setTime(date.getTime() + 30000000)
-			update()
-			
-			if (date > to) clearInterval(addTime)
-		}, 40)
+		let allHurricanes = nestById(data)
+		let displayed = []
+		let displayedCoordinates = []
+		let date
 
 		let currentDateText = map.append('text')
 			.attr('x', '2em')
 			.attr('y', '2em')
 			.attr('class', 'mono')
-			.text(date.toLocaleDateString())
 
+		function playTimeline(startYear, endYear) {
 
-		function update() {
+			function filterHurricanes(season) {
+				hurricanesPoints
+					.selectAll('g')
+					.remove()
+
+				hurricanesPath
+					.selectAll('path')
+					.remove()
+
+				displayed = allHurricanes.filter(h => h.values[0].year === season)
+				displayedCoordinates = displayed.map(h => h.values.map(d => [d.lon, d.lat]))
+
+				hurricanesPath.datum({type: 'MultiLineString', coordinates: displayedCoordinates})
+					.attr('d', geoGenerator)
+			}
+
+			async function playSeason(season) {
+				date = new Date(`01/01/${season}`)
+				let endDate = new Date(`01/01/${season + 1}`)
+				
+				filterHurricanes(season)
+
+				let addTime = setInterval(_ => {
+					date.setTime(date.getTime() + 100000000)
+	
+					updateHurricanes()
+					
+					if (date >= endDate) {
+						clearInterval(addTime)
+						playSeason(season + 1)
+					}
+				}, 50)
+			}
+
+			playSeason(startYear)
+		}
+
+		function updateHurricanes() {
 			let h = hurricanesPoints
 				.selectAll('g')
-				.data(hurricanes)
+				.data(displayed)
 
 			h.enter()
 				.append('g')
@@ -88,9 +117,11 @@ function GeoHurricane(svg) {
 
 			currentDateText.text(date.toLocaleDateString())
 		}
+
+		playTimeline(yearStart, yearEnd)
 	})
 
-	// Init map
+	// Load and init land map
 	d3.json('json/ne.json', function (err, json) {
 		let landGeojson = topojson.feature(json, json.objects.ne_50m_admin_0_countries)
 
@@ -98,6 +129,7 @@ function GeoHurricane(svg) {
 			.attr('d', geoGenerator)
 	})
 
+	// Resize svg to window
 	function resize () {
 		width = document.querySelector('.container').offsetWidth
 		height = Math.max(window.innerHeight - document.querySelector('header').offsetHeight, 480)
