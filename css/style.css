@@ -12,6 +12,10 @@ svg {
   width: 100%;
 }
 
+.mono {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
 /* ------------------------------------------------------------------ */
 /* --------------------------    DISPLAY   -------------------------- */
 
@@ -51,6 +55,10 @@ header {
   stroke: #000;
   stroke-linejoin: round;
   stroke-width: 0.1pt;
+}
+
+.geohurricane circle.hidden {
+  visibility: hidden;
 }
 
 

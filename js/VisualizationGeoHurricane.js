@@ -24,6 +24,7 @@ function GeoHurricane(svg) {
 		.style('stroke-width', 1)
 		.style('fill', 'none')
 		.style('opacity', .1)
+
 	let hurricanesPoints = map.append('g')
 
 	let zoom = d3.zoom()
@@ -57,6 +58,13 @@ function GeoHurricane(svg) {
 			if (date > to) clearInterval(addTime)
 		}, 40)
 
+		let currentDateText = map.append('text')
+			.attr('x', '2em')
+			.attr('y', '2em')
+			.attr('class', 'mono')
+			.text(date.toLocaleDateString())
+
+
 		function update() {
 			let h = hurricanesPoints
 				.selectAll('g')
@@ -71,13 +79,14 @@ function GeoHurricane(svg) {
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
 					.attr('r', d => .5 + d.wind / 100)
 					.attr('fill', d => d.wind ? color(d.wind) : '#999')
-					.attr('visibility', 'hidden')
+					.attr('class', 'hidden')
 
-			h.selectAll('circle')
-				.attr('visibility', d => (d.timestamp <= date) ? 'visible' : 'hidden')
+			h.selectAll('circle.hidden')
+				.attr('class', d => (d.timestamp <= date) ? '' : 'hidden')
 			
 			h.exit().remove()
 
+			currentDateText.text(date.toLocaleDateString())
 		}
 	})
 
