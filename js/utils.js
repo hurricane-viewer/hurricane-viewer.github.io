@@ -2,6 +2,16 @@
 // --------------------------------------------------------------------------
 // ----------------------------------------- DATA LOADER / TRANDFORM --------
 
+let hurricaneDataCSV = null
+
+async function getHurricaneData() {
+  if (!hurricaneDataCSV) {
+    hurricaneDataCSV = await loadCsv('json/storms.csv')
+  }
+  
+  return hurricaneDataCSV
+}
+
 async function loadCsv(path) {
   return new Promise((ok, rej) => {
 

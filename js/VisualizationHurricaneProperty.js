@@ -14,7 +14,8 @@ async function HurricaneProperty(svg) {
   async function loadAllData(from='01/01/1100', to='01/01/9000') {
 
     if(fullData == null)
-      fullData = (await loadCsv('json/storms.csv')).filter(rec=>rec.wind!='')
+      fullData = await getHurricaneData()
+      // fullData = (await loadCsv('json/storms.csv')).filter(rec=>rec.wind!='')
     let data = cropPeriod(fullData, from, to)
     data = nestById(data)
 
