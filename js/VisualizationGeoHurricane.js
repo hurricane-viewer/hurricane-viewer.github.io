@@ -20,11 +20,11 @@ async function GeoHurricane(svg) {
 	const map = svg.append('g')
 
 	const landPath = map.append('path').attr('class', 'land')
-	// const hurricanesPath = map.append('path').attr('class', 'hurricanes')
+	// const hurricanesPath = map.append('g').attr('class', 'hurricanes')
 	// 	.style('stroke', '#000')
-	// 	.style('stroke-width', 1)
+	// 	.style('stroke-width', .1)
 	// 	.style('fill', 'none')
-	// 	.style('opacity', .1)
+		// .style('opacity', .1)
 
 	const hurricanesPoints = map.append('g')
 
@@ -40,14 +40,18 @@ async function GeoHurricane(svg) {
 		.interpolate(d3.interpolateHcl)
 		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
 
-	// Load storms data
-	// loadCsv('json/storms.csv').then(data => {
-	// getHurricaneData().then(data => {
-	const data = await getHurricaneData()
-	console.log(data);
-	
+	const color2 = d3.scaleSequential()
+		.domain([1, 12])
+		.interpolator(d3.interpolateRainbow)
 
-	const yearStart = 1975
+	// const color3 = d3.scaleLinear().domain([1850, 2016])
+	// 	.interpolate(d3.interpolateHcl)
+	// 	.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+		
+	// Load storms data
+	const data = await getHurricaneData()
+	
+	const yearStart = 1950
 	const yearEnd = 2018
 
 	const allHurricanes = nestById(data)
@@ -60,6 +64,9 @@ async function GeoHurricane(svg) {
 		.attr('y', '2em')
 		.attr('class', 'mono')
 
+	const nbYearsToKeep = 10
+	const opacityChange = 1 / nbYearsToKeep
+
 	function playTimeline(startYear, endYear) {
 
 		function filterHurricanes(season) {
@@ -67,24 +74,14 @@ async function GeoHurricane(svg) {
 				.append('g')
 				.attr('class', `season-${season}`)
 
+			for (let i = 1; i < nbYearsToKeep; i++) {
+				hurricanesPoints
+					.select(`.season-${season - i}`)
+					.style('opacity', 1 - opacityChange * i)
+			}
+
 			hurricanesPoints
-				.select(`.season-${season - 1}`)
-				.style('opacity', .8)
-				
-			hurricanesPoints
-				.select(`.season-${season - 2}`)
-				.style('opacity', .6)
-				
-			hurricanesPoints
-				.select(`.season-${season - 3}`)
-				.style('opacity', .4)
-				
-			hurricanesPoints
-				.select(`.season-${season - 4}`)
-				.style('opacity', .2)
-				
-			hurricanesPoints
-				.select(`.season-${season - 5}`)
+				.select(`.season-${season - nbYearsToKeep}`)
 				.remove()
 
 			// hurricanesPath
@@ -94,8 +91,9 @@ async function GeoHurricane(svg) {
 			displayed = allHurricanes.filter(h => h.values[0].year === season)
 			// displayedCoordinates = displayed.map(h => h.values.map(d => [d.lon, d.lat]))
 
-			// hurricanesPath.datum({type: 'MultiLineString', coordinates: displayedCoordinates})
+			// hurricanesPath.append('path').datum({type: 'MultiLineString', coordinates: displayedCoordinates})
 			// 	.attr('d', geoGenerator)
+			// 	.style('stroke', color3(season))
 		}
 
 		async function playSeason(season) {
@@ -105,7 +103,7 @@ async function GeoHurricane(svg) {
 			filterHurricanes(season)
 
 			const addTime = setInterval(_ => {
-				date.setTime(date.getTime() + 100000000)
+				date.setTime(date.getTime() + 200000000)
 
 				updateHurricanes(season)
 				
@@ -132,8 +130,9 @@ async function GeoHurricane(svg) {
 			.enter()
 				.append('circle')
 				.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
-				.attr('r', d => .5 + d.wind / 100)
-				.attr('fill', d => d.wind ? color(d.wind) : '#999')
+				.attr('r', d => .75 + d.wind / 75)
+				// .attr('fill', d => d.wind ? color(d.wind) : '#999')
+				.attr('fill', d => color2(d.timestamp.getMonth()))
 				.attr('class', 'hidden')
 
 				.on('click', d => {
