@@ -8,27 +8,27 @@ function GeoHurricane(svg) {
 
 	svg.style('background', '#fff')
 
-	// let projection = d3.geoNaturalEarth1()
-	let projection = d3.geoCylindricalStereographic()
+	const projection = d3.geoNaturalEarth1()
+	// const projection = d3.geoCylindricalStereographic()
 		.rotate([200, 0, 0]) // Center on the pacific ocean
 		.scale(150)
 		.translate([width / 2, height / 2])
 	
-	let geoGenerator = d3.geoPath()
+	const geoGenerator = d3.geoPath()
 		.projection(projection)
 
-	let map = svg.append('g')
+	const map = svg.append('g')
 
-	let landPath = map.append('path').attr('class', 'land')
-	let hurricanesPath = map.append('path').attr('class', 'hurricanes')
-		.style('stroke', '#000')
-		.style('stroke-width', 1)
-		.style('fill', 'none')
-		.style('opacity', .1)
+	const landPath = map.append('path').attr('class', 'land')
+	// const hurricanesPath = map.append('path').attr('class', 'hurricanes')
+	// 	.style('stroke', '#000')
+	// 	.style('stroke-width', 1)
+	// 	.style('fill', 'none')
+	// 	.style('opacity', .1)
 
-	let hurricanesPoints = map.append('g')
+	const hurricanesPoints = map.append('g')
 
-	let zoom = d3.zoom()
+	const zoom = d3.zoom()
 		.scaleExtent([1, 8])
 		.translateExtent([[0, 0], [width, height]])
 		.on('zoom', _ => {
@@ -36,21 +36,21 @@ function GeoHurricane(svg) {
 		})
 	svg.call(zoom)
 
-	let color = d3.scaleLinear().domain([0, 140])
+	const color = d3.scaleLinear().domain([0, 140])
 		.interpolate(d3.interpolateHcl)
 		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
 
 	// Load storms data
 	loadCsv('json/storms.csv').then(data => {
-		let yearStart = 1975
-		let yearEnd = 2018
+		const yearStart = 1975
+		const yearEnd = 2018
 
-		let allHurricanes = nestById(data)
+		const allHurricanes = nestById(data)
 		let displayed = []
-		let displayedCoordinates = []
+		// let displayedCoordinates = []
 		let date
 
-		let currentDateText = map.append('text')
+		const currentDateText = map.append('text')
 			.attr('x', '2em')
 			.attr('y', '2em')
 			.attr('class', 'mono')
@@ -65,28 +65,32 @@ function GeoHurricane(svg) {
 				hurricanesPoints
 					.select(`.season-${season - 1}`)
 					.style('opacity', .8)
+					
 				hurricanesPoints
 					.select(`.season-${season - 2}`)
 					.style('opacity', .6)
+					
 				hurricanesPoints
 					.select(`.season-${season - 3}`)
 					.style('opacity', .4)
+					
 				hurricanesPoints
 					.select(`.season-${season - 4}`)
 					.style('opacity', .2)
+					
 				hurricanesPoints
 					.select(`.season-${season - 5}`)
 					.remove()
 
-				hurricanesPath
-					.selectAll('path')
-					.remove()
+				// hurricanesPath
+				// 	.selectAll('path')
+				// 	.remove()
 
 				displayed = allHurricanes.filter(h => h.values[0].year === season)
-				displayedCoordinates = displayed.map(h => h.values.map(d => [d.lon, d.lat]))
+				// displayedCoordinates = displayed.map(h => h.values.map(d => [d.lon, d.lat]))
 
-				hurricanesPath.datum({type: 'MultiLineString', coordinates: displayedCoordinates})
-					.attr('d', geoGenerator)
+				// hurricanesPath.datum({type: 'MultiLineString', coordinates: displayedCoordinates})
+				// 	.attr('d', geoGenerator)
 			}
 
 			async function playSeason(season) {
@@ -95,7 +99,7 @@ function GeoHurricane(svg) {
 				
 				filterHurricanes(season)
 
-				let addTime = setInterval(_ => {
+				const addTime = setInterval(_ => {
 					date.setTime(date.getTime() + 100000000)
 	
 					updateHurricanes(season)
@@ -111,7 +115,7 @@ function GeoHurricane(svg) {
 		}
 
 		function updateHurricanes(season) {
-			let h = hurricanesPoints
+			const h = hurricanesPoints
 				.select(`.season-${season}`)
 				.selectAll('g')
 				.data(displayed)
@@ -140,7 +144,7 @@ function GeoHurricane(svg) {
 
 	// Load and init land map
 	d3.json('json/ne.json', function (err, json) {
-		let landGeojson = topojson.feature(json, json.objects.ne_50m_admin_0_countries)
+		const landGeojson = topojson.feature(json, json.objects.ne_50m_admin_0_countries)
 
 		landPath.datum({type: 'FeatureCollection', features: landGeojson.features})
 			.attr('d', geoGenerator)
