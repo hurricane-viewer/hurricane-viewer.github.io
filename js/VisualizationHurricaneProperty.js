@@ -45,7 +45,8 @@ async function HurricaneProperty(svg) {
   // ------------------------------------------ POSITIONNING DATA -------
 
   let width = parseInt(svg.style("width").replace('px',''))
-  let height = parseInt(svg.style("height").replace('px',''))
+  let height = 500;//parseInt(svg.style("height").replace('px',''))
+  svg.style("height",height)
 
   let leftMargin = 30
   let bottomMargin = 20
