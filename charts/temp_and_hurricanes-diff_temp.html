@@ -184,7 +184,6 @@
 	  .defer(d3.json, "./data/tornadoes_test.json")
 	  .await(createChart);
 	  
-	var meanTemp;
 	var torn;
 	
 	function createChart(error, temperatures, tornadoes) {
@@ -226,12 +225,11 @@
 	  xc.domain(x.domain());
 	  yc.domain(y.domain());
 
-	  meanTemp = d3.mean(temperatures, function(d) { return d.value; });
 	  torn = tornadoes;
 	  
 	  //Contenu du graphique
-	  displayTemp(temperatures, meanTemp);
-	  <!-- displayTorn(tornadoes, meanTemp); -->
+	  displayTemp(temperatures);
+	  <!-- displayTorn(tornadoes); -->
 	  
 	  //Mise à jour des axes
       focus.append("g")
@@ -251,14 +249,14 @@
 	
 	
     //Gestion des données de températures
-	function displayTemp(data, meanTemp) {
+	function displayTemp(data) {
 	  
 	  //Préparation de la coloration des courbes
 	  focus.append("linearGradient")
 		  .attr("id", "temperature-gradient")
 		  .attr("gradientUnits", "userSpaceOnUse")
-		  .attr("x1", 0).attr("y1", y(meanTemp - 10))
-		  .attr("x2", 0).attr("y2", y(meanTemp + 10))
+		  .attr("x1", 0).attr("y1", y(-0.2))
+		  .attr("x2", 0).attr("y2", y(+0.2))
 		.selectAll("stop")
 		  .data([
 				  {offset: "0%", color: "green"},
@@ -273,8 +271,8 @@
 	  context.append("linearGradient")
 		  .attr("id", "temperature-gradient-context")
 		  .attr("gradientUnits", "userSpaceOnUse")
-		  .attr("x1", 0).attr("y1", yc(meanTemp - 10))
-		  .attr("x2", 0).attr("y2", yc(meanTemp + 10))
+		  .attr("x1", 0).attr("y1", yc(-0.2))
+		  .attr("x2", 0).attr("y2", yc(+0.2))
 		.selectAll("stop")
 		  .data([
 				  {offset: "0%", color: "green"},
@@ -294,7 +292,7 @@
 	  //Placement de la ligne de température moyenne
 	  focus.append("g")
 		.attr("id", "mean_line")
-        .attr("transform", "translate(0, " + y(meanTemp) + ")")
+        .attr("transform", "translate(0, " + y(0) + ")")
         .append("line")
         .attr("x2", width - margin.right);
 		
@@ -321,7 +319,7 @@
     
 	
     //Gestion des données relatives aux ouragans, tornades...
-	function displayTorn(data, meanTemp) {
+	function displayTorn(data) {
 	
 	  //Remonte la zone au premier plan (par-dessus rect.zoom) pour permettre les event mouse
 	  circles_chart.raise();
@@ -338,32 +336,32 @@
       });
 
       //Ajout des cercles
-      addTorn(data, meanTemp);
+      addTorn(data);
 		
 	  //Affichage des cercles (de la partie context)
       context.selectAll("circle").data(data).enter()
         .append("circle")
-		.style("fill", function(d) { return d.value < meanTemp ? green : red; })
+		.style("fill", function(d) { return d.value < 0 ? green : red; })
         .style("stroke", "black")
         .attr("r", 3)
         .attr("cx", function(d) { return xc(d.date_start); })
         .attr("cy", function(d) { return yc(d.value); });
     }
 	
-	function updateTorn(data, meanTemp) {
+	function updateTorn(data) {
 	  //Suppression des anciennes marques
 	  circles_chart.selectAll("circle").remove();
 	  
 	  //Ajout des nouvelles
-	  addTorn(data, meanTemp);
+	  addTorn(data);
 	}
 	
-	function addTorn(data, meanTemp) {
+	function addTorn(data) {
 
       //Affichage des cercles
       circles_chart.selectAll("circle").data(data)
 		.enter().append("circle")
-		.style("fill", function(d) { return d.value < meanTemp ? green : red; })
+		.style("fill", function(d) { return d.value < 0 ? green : red; })
         .style("stroke", "black")
         .attr("r", function(d) { return intensityScale(d.intensity); })
         .attr("cx", function(d) { return x(d.date_start); })
@@ -426,7 +424,7 @@
 	  var newTornadoes = torn.filter(function (d){
 			return d.date_start >= newXExtent[0] && d.date_end <= newXExtent[1];
 		  });
-	  <!-- updateTorn(newTornadoes, meanTemp); -->
+	  <!-- updateTorn(newTornadoes); -->
 	}
 
 	//Gestion des actions de zoom sur le graphique
@@ -447,7 +445,7 @@
 	  var newTornadoes = torn.filter(function (d){
 			return d.date_start >= newXExtent[0] && d.date_end <= newXExtent[1];
 		  });
-	  <!-- updateTorn(newTornadoes, meanTemp); -->
+	  <!-- updateTorn(newTornadoes); -->
 	}
     
   </script>
