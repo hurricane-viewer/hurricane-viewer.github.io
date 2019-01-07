@@ -1,0 +1,37 @@
+<body>
+
+
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.0/topojson.min.js"></script>
+    <script src='js/utils.js'></script>
+    <script src='js/VisualizationHurricaneProperty.js'></script>
+
+    <style>
+
+      svg {
+        width:100%;
+        height:100%;
+      }
+
+      #hurricaneproperty {
+        width:calc(100% - 20px);
+        height:calc(100% - 20px);
+      }
+
+    </style>
+
+  </head>
+
+    <!-- HURICANNE PROPERTY !-->
+    <div id='hurricaneproperty' class="hurricaneproperty"></div>
+
+    <script type="text/javascript">
+      
+      const ID_HURRICANE_PROPERTY = '#hurricaneproperty'
+      var hurricanePropertySvg = d3.select(ID_HURRICANE_PROPERTY).append('svg')
+      HurricaneProperty(hurricanePropertySvg)
+
+    </script>
+
+</body>
