@@ -12,12 +12,16 @@ svg {
   width: 100%;
 }
 
+.mono {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
 /* ------------------------------------------------------------------ */
 /* --------------------------    DISPLAY   -------------------------- */
 
 .container {
   width: 100%;
-  max-width: 720px;
+  max-width: 980px;
   margin: 0 auto;
   
   background-color: #DDD;
@@ -44,6 +48,17 @@ header {
 
 .geohurricane {
   grid-area: gMap;
+}
+
+.geohurricane .land {
+  fill: #ddd;
+  stroke: #000;
+  stroke-linejoin: round;
+  stroke-width: 0.1pt;
+}
+
+.geohurricane circle.hidden {
+  visibility: hidden;
 }
 
 

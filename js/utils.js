@@ -11,6 +11,9 @@ async function loadCsv(path) {
         dat.timestamp = new Date(dat.time)
         dat.lat = +dat.lat
         dat.lon = +dat.lon
+        dat.wind = +dat.wind
+        dat.pres = +dat.pres
+        dat.year = +dat.year
       })
 
       ok(data)
