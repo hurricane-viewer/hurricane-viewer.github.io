@@ -172,6 +172,6 @@ async function GeoHurricane(svg) {
 }
 
 function GeoHurricaneFocus(svg, txtDiv) {
-	svg.style('background', '#00f')
-	txtDiv.html('DU TEXTE POur le ZoOm')
+	svg.style('background', '#222')
+	txtDiv.html('GeoHurricane focus')
 }
