@@ -23,8 +23,6 @@ svg {
   width: 100%;
   max-width: 980px;
   margin: 0 auto;
-  
-  background-color: #DDD;
 
   display: grid;
 
@@ -35,6 +33,7 @@ svg {
     "gMap gMap gMap gMap gMap"
     "gTxt gTxt gTxt gViz gViz"
     "prop prop prop prop prop"
+    "hTit hTit hTit hTit hTit"
     "hViz hViz hTxt hTxt hTxt";
 }
 
@@ -60,7 +59,7 @@ header {
 
 .geohurricane .land {
   fill: #ddd;
-  stroke: #000;
+  stroke: #aaa;
   stroke-linejoin: round;
   stroke-width: 0.1pt;
 }
@@ -77,11 +76,13 @@ header {
   grid-area: gViz;
 }
 
-
 .hurricaneproperty {
   grid-area: prop;
 }
 
+.planetHeatingTitle {
+  grid-area: hTit;
+}
 
 .planetheating-viz {
   grid-area: hViz;
@@ -89,4 +90,56 @@ header {
 
 .planetheating-txt {
   grid-area: hTxt;
+}
+
+/* ------------------------------------------------------------------ */
+/* -------------------------- VISUALIZATIONS ------------------------ */
+
+h1 {
+  text-align: center;
+  font-size: 50px;
+  margin: 50px;
+}
+
+.informations {
+  text-align: justify;
+}
+
+h2 {
+  margin-top:50px;
+  margin-left:30px;
+  position: relative;
+}
+
+h2:after {
+  content:'';
+  position: absolute;
+  width: 20px;
+  height: 3px;
+  background: #000;
+  left:-30px;
+  top:16px;
+}
+
+hr {
+  margin:50px;
+  width:200px;
+  margin-left: calc(50% - 100px);
+  border:none;
+  border-bottom: 1px solid;
+  opacity: 0.2;
+}
+
+/* ------------------------------------------------------------------ */
+/* -------------------------- VISUALIZATIONS ------------------------ */
+
+.dataviz {
+}
+
+.planetheating-txt {
+  padding: 10px;
+}
+
+footer {
+  height:100px;
 }

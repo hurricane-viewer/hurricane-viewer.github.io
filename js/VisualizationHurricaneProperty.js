@@ -30,12 +30,14 @@ async function HurricaneProperty(svg) {
       hur.values.forEach(dat => dat.timeFromBegin = 
         dat.timestamp/1000 - hur.beginTime
       )
-      hur.timeLength = parseInt(hur.values[hur.values.length-1].timeFromBegin)
+      hur.timeLength = hur.values[hur.values.length-1].timeFromBegin
       hur.winds = hur.values.map(val => {
-        return {wind:parseInt(val.wind),time:val.timeFromBegin}
+        return {wind:val.wind,time:val.timeFromBegin}
       })
-      hur.winds = hur.winds.filter(val => !isNaN(val.wind))
+      //hur.winds = hur.winds.filter(val => val.wind != 0)
     })
+
+    data = data.filter(dat => dat.winds.length > 0)
 
     return data
   }

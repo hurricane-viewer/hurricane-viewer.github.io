@@ -5,9 +5,6 @@
 
 const ID_GEO_HURRICANE = '#geohurricane'
 
-const ID_GEO_FOCUS_TXT = '#geofocus-txt'
-const ID_GEO_FOCUS_VIZ = '#geofocus-viz'
-
 const ID_HURRICANE_PROPERTY = '#hurricaneproperty'
 
 const ID_PLANET_HEATING_VIZ = '#planetheating-viz'
@@ -19,9 +16,6 @@ const ID_PLANET_HEATING_TXT = '#planetheating-txt'
 async function main() {
     var geoHurricaneSvg = d3.select(ID_GEO_HURRICANE).append('svg')
     
-    var geoHurricaneFocusTxt = d3.select(ID_GEO_FOCUS_TXT)
-    var geoHurricaneFocusSvg = d3.select(ID_GEO_FOCUS_VIZ).append('svg')
-    
     var hurricanePropertySvg = d3.select(ID_HURRICANE_PROPERTY).append('svg')
     
     var planetHeatingSvg = d3.select(ID_PLANET_HEATING_VIZ).append('svg')
@@ -29,7 +23,6 @@ async function main() {
     
     // --- launch dataviz
     await GeoHurricane(geoHurricaneSvg)
-    GeoHurricaneFocus(geoHurricaneFocusSvg, geoHurricaneFocusTxt)
     
     await HurricaneProperty(hurricanePropertySvg)
     
