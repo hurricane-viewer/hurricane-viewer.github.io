@@ -34,6 +34,16 @@ async function main() {
     await HurricaneProperty(hurricanePropertySvg)
     
     PlanetHeating(planetHeatingSvg, planetHeatingTxt)
+
+    const yearSlider = document.querySelector('#hurricane-year-slider')
+
+    yearSlider.addEventListener('change', _ => {
+       EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
+    })
+
+    EventEngine.registerTo(EventEngine.EVT.sliderTimeChange, date => {
+        yearSlider.value = date.getFullYear()
+    })
 }
 
 main()

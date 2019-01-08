@@ -4,6 +4,12 @@ async function GeoHurricane(svg) {
 	let width = 720,
 		height = 480
 
+	const nbYearsToKeep = 10
+	const opacityChange = 1 / nbYearsToKeep
+
+	const playTimeStepMs = 12 * 60 *60 * 1000
+	const playTimeInterval = 50
+
 	resize()
 
 	svg.style('background', '#fff')
@@ -51,104 +57,100 @@ async function GeoHurricane(svg) {
 	// Load storms data
 	const data = await getHurricaneData()
 	
-	const yearStart = 1950
-	const yearEnd = 2018
-
 	const allHurricanes = nestById(data)
 	let displayed = []
 	// let displayedCoordinates = []
 	let date
+	let addTimeInterval
 
 	const currentDateText = map.append('text')
 		.attr('x', '2em')
 		.attr('y', '2em')
 		.attr('class', 'mono')
 
-	const nbYearsToKeep = 10
-	const opacityChange = 1 / nbYearsToKeep
+	function clearAll() {
+		hurricanesPoints.selectAll('g').remove()
+	}
 
-	function playTimeline(startYear, endYear) {
+	function filterHurricanes(season) {
+		displayed = allHurricanes.filter(h => h.values[0].year === season)
 
-		function filterHurricanes(season) {
+		hurricanesPoints
+			.append('g')
+			.attr('class', `season-${season}`)
+			.selectAll('g')
+			.data(displayed)
+			.enter()
+			.append('g')
+				.selectAll('circle')
+				.data(h => h.values)
+				.enter()
+				.append('circle')
+					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
+					.attr('r', d => .75 + d.wind / 75)
+					.attr('fill', d => d.wind ? color(d.wind) : '#999')
+					// .attr('fill', d => color2(d.timestamp.getMonth()))
+					.attr('class', 'hidden')
+
+					.on('click', d => {
+						EventEngine.triggerEvent(EventEngine.EVT.hurricaneSelected, d.id)
+					})
+
+		for (let i = 1; i < nbYearsToKeep; i++) {
 			hurricanesPoints
-				.append('g')
-				.attr('class', `season-${season}`)
-
-			for (let i = 1; i < nbYearsToKeep; i++) {
-				hurricanesPoints
-					.select(`.season-${season - i}`)
-					.style('opacity', 1 - opacityChange * i)
-			}
-
-			hurricanesPoints
-				.select(`.season-${season - nbYearsToKeep}`)
-				.remove()
-
-			// hurricanesPath
-			// 	.selectAll('path')
-			// 	.remove()
-
-			displayed = allHurricanes.filter(h => h.values[0].year === season)
-			// displayedCoordinates = displayed.map(h => h.values.map(d => [d.lon, d.lat]))
-
-			// hurricanesPath.append('path').datum({type: 'MultiLineString', coordinates: displayedCoordinates})
-			// 	.attr('d', geoGenerator)
-			// 	.style('stroke', color3(season))
+				.select(`.season-${season - i}`)
+				.style('opacity', 1 - opacityChange * i)
 		}
 
-		async function playSeason(season) {
-			date = new Date(`01/01/${season}`)
-			let endDate = new Date(`01/01/${season + 1}`)
+		hurricanesPoints
+			.select(`.season-${season - nbYearsToKeep}`)
+			.remove()
+
+		// hurricanesPath
+		// 	.selectAll('path')
+		// 	.remove()
+		// displayedCoordinates = displayed.map(h => h.values.map(d => [d.lon, d.lat]))
+
+		// hurricanesPath.append('path').datum({type: 'MultiLineString', coordinates: displayedCoordinates})
+		// 	.attr('d', geoGenerator)
+		// 	.style('stroke', color3(season))
+	}
+
+	function playSeason(season) {
+		date = new Date(`01/01/${season}`)
+		let endDate = new Date(`01/01/${season + 1}`)
+		
+		filterHurricanes(season)
+
+		addTimeInterval = setInterval(_ => {
+			date.setTime(date.getTime() + playTimeStepMs)
+
+			updateHurricanes(season)
 			
-			filterHurricanes(season)
-
-			const addTime = setInterval(_ => {
-				date.setTime(date.getTime() + 200000000)
-
-				updateHurricanes(season)
-				
-				if (date >= endDate) {
-					clearInterval(addTime)
-					playSeason(season + 1)
-				}
-			}, 50)
-		}
-
-		playSeason(startYear)
+			if (date >= endDate) {
+				clearInterval(addTimeInterval)
+				// playSeason(season + 1)
+				EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, endDate)
+			}
+		}, playTimeInterval)
 	}
 
 	function updateHurricanes(season) {
-		const h = hurricanesPoints
+		hurricanesPoints
 			.select(`.season-${season}`)
 			.selectAll('g')
 			.data(displayed)
-
-		h.enter()
-			.append('g')
-			.selectAll('circle')
-			.data(h => h.values)
-			.enter()
-				.append('circle')
-				.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
-				.attr('r', d => .75 + d.wind / 75)
-				// .attr('fill', d => d.wind ? color(d.wind) : '#999')
-				.attr('fill', d => color2(d.timestamp.getMonth()))
-				.attr('class', 'hidden')
-
-				.on('click', d => {
-					EventEngine.triggerEvent(EventEngine.EVT.hurricaneSelected, d.id)
-				})
-
-		h.selectAll('circle.hidden')
-			.attr('class', d => (d.timestamp <= date) ? '' : 'hidden')
-		
-		h.exit().remove()
+			.selectAll('circle.hidden')
+				.attr('class', d => (d.timestamp <= date) ? '' : 'hidden')
 
 		currentDateText.text(date.toLocaleDateString())
 	}
 
-	playTimeline(yearStart, yearEnd)
-	// })
+	EventEngine.registerTo(EventEngine.EVT.sliderTimeChange, date => {
+		clearInterval(addTimeInterval)
+		// clearAll()
+		playSeason(date.getFullYear())
+	})
 
 	// Load and init land map
 	d3.json('json/ne.json', function (err, json) {

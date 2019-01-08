@@ -54,6 +54,10 @@ header {
   cursor: move;
 }
 
+.geohurricane .controls input {
+  width: 100%;
+}
+
 .geohurricane .land {
   fill: #ddd;
   stroke: #000;
