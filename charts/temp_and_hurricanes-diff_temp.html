@@ -2,6 +2,7 @@
 <head>
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="../js/utils.js"></script>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   <style>
     body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0;
@@ -109,6 +110,8 @@
 	//Echelle linéaire en Y (température)
     var y = d3.scaleLinear().range([height, 0]);
 	var yc = d3.scaleLinear().range([height2, 0]);
+	var ytorn = d3.scaleLinear().range([height, 0]);
+	var yctorn = d3.scaleLinear().range([height2, 0]);
     var yAxis = d3.axisLeft().scale(y);
 
 	//Echelle linéaire pour la taille des cercles (intensité)
@@ -181,13 +184,25 @@
 	//Attend le chargement des jeux de données avant exécution de la suite
 	d3.queue()
 	  .defer(d3.csv, "./data/monthly_csv.csv")
-	  .defer(d3.json, "./data/tornadoes_test.json")
+	  .defer(d3.csv, "../json/storms.csv")
 	  .await(createChart);
 	  
 	var torn;
 	
-	function createChart(error, temperatures, tornadoes) {
+	async function createChart(error, temperatures, tornadoes) {
 	  if (error) { console.log(error); }
+	  
+	  <!-- tornadoes = getHurricaneData().then(function(data) { return data }); -->
+	  tornadoes.forEach(dat => {
+        dat.timestamp = new Date(dat.time)
+        dat.lat = +dat.lat
+        dat.lon = +dat.lon
+        dat.wind = +dat.wind
+        dat.pres = +dat.pres
+        dat.year = +dat.year
+      })
+	  tornadoes = nestById(tornadoes);
+	  <!-- tornadoes = await getHurricaneData; -->
 	  
 	  //Filtre des données
 	  var temperatures = temperatures.filter(function (d){
@@ -200,8 +215,9 @@
 		d.value = +d.Mean;
       });
       tornadoes.forEach(function(d) {
-        d.date_start = parseDate(d.date_start);
-		d.date_end = parseDate(d.date_end);
+        d.date_start = d3.min(d.values, function(da) { return da.timestamp });
+		d.date_end = d3.max(d.values, function(da) { return da.timestamp });
+		d.value = d3.max(d.values, function(da) { return da.wind });
       });
 	  
 	  //Calculs nécessaires à la synchronisation des axes/échelles
@@ -209,27 +225,27 @@
 	  minDateStart = d3.min(tornadoes, function(d) { return d.date_start; });
 	  maxDateEnd = d3.max(tornadoes, function(d) { return d.date_end; });
 	  extent = [extentDateTemp[0] < minDateStart ? extentDateTemp[0] : minDateStart,
-				extentDateTemp[1] > maxDateEnd ? extentDateTemp[1] : maxDateEnd];	
-	  maxValueTemp = d3.max(temperatures, function(d) { return d.value; });
-	  maxValueTorn = d3.max(tornadoes, function(d) { return d.value; });
+				extentDateTemp[1] > maxDateEnd ? extentDateTemp[1] : maxDateEnd];
 	  
 	  //Ajustement des échelles selon les deux jeux de données
 	  x.domain(extent);
-	  <!-- y.domain([0, maxValueTemp > maxValueTorn ? maxValueTemp : maxValueTorn]); -->
 	  y.domain(d3.extent(temperatures, function(d) { return d.value; }));
+	  ytorn.domain(d3.extent(tornadoes, function(d) { return d.value; }));
 	  
 	  console.log(temperatures)
 	  console.log(d3.extent(temperatures, function(d) { return d.value; }));
 	  console.log(extent);
+	  console.log(tornadoes);
 	  
 	  xc.domain(x.domain());
 	  yc.domain(y.domain());
+	  yctorn.domain(ytorn.domain());
 
 	  torn = tornadoes;
 	  
 	  //Contenu du graphique
 	  displayTemp(temperatures);
-	  <!-- displayTorn(tornadoes); -->
+	  displayTorn(tornadoes);
 	  
 	  //Mise à jour des axes
       focus.append("g")
@@ -341,11 +357,11 @@
 	  //Affichage des cercles (de la partie context)
       context.selectAll("circle").data(data).enter()
         .append("circle")
-		.style("fill", function(d) { return d.value < 0 ? green : red; })
+		<!-- .style("fill", function(d) { return d.value < 0 ? green : red; }) -->
         .style("stroke", "black")
         .attr("r", 3)
         .attr("cx", function(d) { return xc(d.date_start); })
-        .attr("cy", function(d) { return yc(d.value); });
+        .attr("cy", function(d) { return yctorn(d.value); });
     }
 	
 	function updateTorn(data) {
@@ -361,44 +377,45 @@
       //Affichage des cercles
       circles_chart.selectAll("circle").data(data)
 		.enter().append("circle")
-		.style("fill", function(d) { return d.value < 0 ? green : red; })
+		<!-- .style("fill", function(d) { return d.value < 0 ? green : red; }) -->
         .style("stroke", "black")
-        .attr("r", function(d) { return intensityScale(d.intensity); })
+        <!-- .attr("r", function(d) { return intensityScale(d.intensity); }) -->
+        .attr("r", 3)
         .attr("cx", function(d) { return x(d.date_start); })
-        .attr("cy", function(d) { return y(d.value); })
+        .attr("cy", function(d) { return ytorn(d.value); })
       	
 		//Gestion du tooltip
-		.on("mousemove", function(d) {
-          //Coordonnées du curseur
-          var mouse = d3.mouse(svg.node()).map(function(d) {
-            return parseInt(d);
-          });
+		<!-- .on("mousemove", function(d) { -->
+          <!-- //Coordonnées du curseur -->
+          <!-- var mouse = d3.mouse(svg.node()).map(function(d) { -->
+            <!-- return parseInt(d); -->
+          <!-- }); -->
 		  
-		  //Apparition et contenu
-		  tooltip.classed("hidden", false)
-			.html('<div class="title">' + d.name + '</div>' + 
-                  '<div><i class="far fa-calendar icon"></i>' + d.full_date_start + '</div>' +
-                  '<div><i class="far fa-calendar-times icon"></i>' + d.full_date_end + '</div>' +
-                  '<div><i class="fas fa-cloud-showers-heavy icon"></i>' + d.intensity + '</div>' +
-                  '<div><i class="fas fa-skull-crossbones icon"></i>' + d.death + '</div>' +
-                  '<div><i class="fas fa-dollar-sign icon"></i>' + d.cost + '</div>');
+		  <!-- //Apparition et contenu -->
+		  <!-- tooltip.classed("hidden", false) -->
+			<!-- .html('<div class="title">' + d.name + '</div>' +  -->
+                  <!-- '<div><i class="far fa-calendar icon"></i>' + d.full_date_start + '</div>' + -->
+                  <!-- '<div><i class="far fa-calendar-times icon"></i>' + d.full_date_end + '</div>' + -->
+                  <!-- '<div><i class="fas fa-cloud-showers-heavy icon"></i>' + d.intensity + '</div>' + -->
+                  <!-- '<div><i class="fas fa-skull-crossbones icon"></i>' + d.death + '</div>' + -->
+                  <!-- '<div><i class="fas fa-dollar-sign icon"></i>' + d.cost + '</div>'); -->
 		  
-		  //Choix du placement du tooltip (gauche/droite)
-		  if (mouse[0] + 70 < 800) {
-			tooltip.attr("style", "left:" + (mouse[0] + 70) + "px; " +
-								  "top:" + (mouse[1] - 35) + "px");
-		  } else {
-			let div = document.getElementById('tooltip');
-			let divWidth = div.offsetWidth;
-			tooltip.attr("style", "left:" + (mouse[0] - divWidth + 20) + "px; " +
-								  "top:" + (mouse[1] - 35) + "px");
-		  }
-        })
+		  <!-- //Choix du placement du tooltip (gauche/droite) -->
+		  <!-- if (mouse[0] + 70 < 800) { -->
+			<!-- tooltip.attr("style", "left:" + (mouse[0] + 70) + "px; " + -->
+								  <!-- "top:" + (mouse[1] - 35) + "px"); -->
+		  <!-- } else { -->
+			<!-- let div = document.getElementById('tooltip'); -->
+			<!-- let divWidth = div.offsetWidth; -->
+			<!-- tooltip.attr("style", "left:" + (mouse[0] - divWidth + 20) + "px; " + -->
+								  <!-- "top:" + (mouse[1] - 35) + "px"); -->
+		  <!-- } -->
+        <!-- }) -->
 
-      	//Disparition du tooltip
-        .on("mouseout", function() {
-          tooltip.classed("hidden", true);
-        });
+      	<!-- //Disparition du tooltip -->
+        <!-- .on("mouseout", function() { -->
+          <!-- tooltip.classed("hidden", true); -->
+        <!-- }); -->
 	
 	}
 	
