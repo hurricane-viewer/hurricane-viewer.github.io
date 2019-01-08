@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="../js/utils.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0;
+		   padding: 10px;
+		   background-color: #eee;}
+	
+    .line {
+		fill: none;
+		stroke: url(#temperature-gradient);
+		stroke-width: 1.5px;
+    }
+	.line_context {
+		fill: none;
+		stroke: url(#temperature-gradient-context);
+		stroke-width: 1.5px;
+    }
+	
+	#mean_line {
+		stroke: #aaa;
+		stroke-width: 2px;
+	}
+    
+    .axis_title {
+		font-weight: bold;
+		font-family: Arial;
+		font-size: 10pt;
+    }
+    
+    #tooltip {
+      	font-weight: bold;
+        color: #222;
+        background-color: rgba(255,255,255,.9);
+      
+        padding: .5em .5em .3em 0;
+        text-shadow: #f5f5f5 0 1px 0;
+        border-radius: 5px;
+		border: solid 2px;
+        position: absolute;
+    }
+	#tooltip .title {
+		text-align: center;
+		font-size: large;
+		font-weight: bold;
+		font-family: Arial;
+		
+		border-bottom: solid 2px;
+		padding-bottom: 5px;
+		margin-bottom: 5px;
+		margin-left: .5em;
+	}
+    
+    .hidden {
+        display: none;
+    }
+	
+	.icon {
+		width: 30px;
+		text-align: center;
+		padding: 4px 0px 4px 0px;
+	}
+	
+	.zoom {
+		cursor: move;
+		fill: none;
+		pointer-events: all;
+	}
+  </style>
+</head>
+
+<body>
+  <script>
+    //Marges
+    var margin = {top: 20, right: 20, bottom: 110, left: 40},
+		margin2 = {top: 420, right: 30, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+		height2 = 500 - margin2.top - margin2.bottom;
+		
+	//Couleurs pour les cercles (Blind frendly ; photocopy, LCD et print friendly)
+	var red = "#de2d26";
+	var green = "#31a354";
+
+    //Canvas SVG dans lequel dessiner les graphiques
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + (margin.top / 2) + ")");
+    
+    //Fonctions pour le parsage/formatage des dates/valeurs
+    var parseDate = d3.timeParse("%Y-%m");
+	var parseDate2 = d3.timeParse("%Y-%m-%d");
+    var displayMonth = d3.timeFormat("%m");
+	var displayYear = d3.timeFormat("%Y");
+    var displayValue = d3.format(",.0f");
+	
+	var frenchMonths = ["Janvier", "Février",  "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    
+    //Echelle temporelle en X (temps)
+    var x = d3.scaleTime().range([0, width - margin.right]);
+	var xc = d3.scaleTime().range([0, width - margin.right]);
+    var xAxis = d3.axisBottom().scale(x);
+	var xcAxis = d3.axisBottom().scale(xc);
+		
+	//Echelle linéaire en Y (température)
+    var y = d3.scaleLinear().range([height, 0]);
+	var yc = d3.scaleLinear().range([height2, 0]);
+    var yAxis = d3.axisLeft().scale(y);
+	
+	//Echelle ordinale en X et linéaire en Y (nombre d'ouragans)
+	var xtorn =  d3.scaleBand().range([0, width - margin.right]);
+	var ytorn =  d3.scaleLinear().range([0, height]);
+	
+	
+	//Séparation de l'espace svg en deux (context = partie inférieure, focus = zone principale)
+	var context = svg.append("g")
+		.attr("transform", "translate(" + 0 + "," + margin2.top + ")")
+		.attr("id", "context");
+	var focus = svg.append("g").attr("id", "focus");
+	var line_chart = focus.append("g").attr("clip-path", "url(#clip)");
+	var bars_chart = svg.append("g").attr("id", "bars");
+	
+	
+    //Noms des axes
+    focus.append("text")
+      .attr("x", 15)
+      .attr("y", 10)
+	  .attr("class", "axis_title")
+	  .text("Écart par rapport à la température moyenne");
+    focus.append("text")
+      .attr("x", 15)
+      .attr("y", 30)
+	  .attr("class", "axis_title")
+	  .text("de référence (1951-1980) en °C");
+    focus.append("text")
+      .attr("x", width - 70)
+      .attr("y", height - 15)
+	  .attr("class", "axis_title")
+      .text("Années");
+
+    //Div qui servira de tooltip
+    var tooltip = d3.select("body").append("div")
+        .attr("id", "tooltip")
+        .attr("class", "hidden");
+    
+    //Préparation de la courbe joignant les données
+    var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.value); })
+    	.curve(d3.curveBasis);
+		
+	var lineContext = d3.line()
+        .x(function(d) { return xc(d.date); })
+        .y(function(d) { return yc(d.value); })
+    	.curve(d3.curveBasis);
+    
+	
+	
+	//Préparation pour zoom et déplacement
+	
+	var brush = d3.brushX()
+		.extent([[0, 0], [width - margin.right, height2]])
+		.on("brush end", brushed);
+		
+	var zoom = d3.zoom()
+		.scaleExtent([1, Infinity])
+		.translateExtent([[0, 0], [width, height]])
+		.extent([[0, 0], [width, height]])
+		.on("zoom", zoomed);
+		
+	var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width - margin.right)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0);	
+    
+	
+	
+	//Attend le chargement des jeux de données avant exécution de la suite
+	d3.queue()
+	  .defer(d3.csv, "./data/monthly_csv.csv")
+	  .defer(d3.csv, "../json/storms.csv")
+	  .await(createChart);
+	  
+	var torn;
+	
+	function createChart(error, temperatures, tornadoes) {
+	  if (error) { console.log(error); }
+	  
+	  <!-- tornadoes = getHurricaneData().then(function(data) { return data }); -->
+	  tornadoes.forEach(dat => {
+        dat.timestamp = new Date(dat.time)
+        dat.lat = +dat.lat
+        dat.lon = +dat.lon
+        dat.wind = +dat.wind
+        dat.pres = +dat.pres
+        dat.year = +dat.year
+      })
+	  tornadoes = nestById(tornadoes);
+	  <!-- tornadoes = await getHurricaneData; -->
+	  
+	  //Filtre des données
+	  var temperatures = temperatures.filter(function (d){
+			return d.Source == "GISTEMP";
+		  });
+		  
+	  //Parsage des dates
+      temperatures.forEach(function(d) {
+		d.date = parseDate2(d.Date);
+		d.value = +d.Mean;
+      });
+	  //Parsage des dates et formatage pour affichage
+      tornadoes.forEach(function(d) {
+        d.date_start = d3.min(d.values, function(da) { return da.timestamp });
+		d.date_end = d3.max(d.values, function(da) { return da.timestamp });
+		
+		let month_start = frenchMonths[parseInt(displayMonth(d.date_start)) - 1];
+		let month_end = frenchMonths[parseInt(displayMonth(d.date_end)) - 1];
+		let year_start = displayYear(d.date_start);
+		let year_end = displayYear(d.date_end);
+		
+		d.full_date_start = month_start + " " + year_start;
+		d.full_date_end = month_end + " " + year_end;
+		
+		d.year_start = year_start;
+		d.year_end = year_end;
+      });
+	  
+	  //Calcul du nombre d'ouragans par an
+	  var nb_tornadoes = computeNbTornadoes(tornadoes);
+	  
+	  //Ajustement des échelles
+	  x.domain(d3.extent(temperatures, function(d) { return d.date; }));
+	  y.domain(d3.extent(temperatures, function(d) { return d.value; }));
+	  
+	  xc.domain(x.domain());
+	  yc.domain(y.domain());
+	  
+	  xtorn.domain(nb_tornadoes.map(function(d) { return d.date; }));
+	  ytorn.domain([0, d3.max(nb_tornadoes, function(d) { return d.nb; })]);
+	  
+	  
+	  
+	  console.log(temperatures)
+	  console.log(d3.extent(temperatures, function(d) { return d.value; }));
+	  console.log(d3.extent(temperatures, function(d) { return d.date; }));
+	  console.log(tornadoes);
+	  minDateStart = d3.min(tornadoes, function(d) { return d.year_start; });
+	  maxDateEnd = d3.max(tornadoes, function(d) { return d.year_end; });
+	  console.log([minDateStart, maxDateEnd]);
+	  console.log([0, d3.max(nb_tornadoes, function(d) { return d.nb; })]);
+	  console.log(nb_tornadoes);
+
+	  
+	  
+	  torn = nb_tornadoes;
+	  
+	  //Contenu du graphique
+	  displayTemp(temperatures);
+	  displayTorn(nb_tornadoes);
+	  
+	  //Mise à jour des axes
+      focus.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+      focus.append("g")
+        .attr("class", "axis axis--y")
+        .attr("transform", "translate(0,0)")
+      	.call(yAxis);
+	  context.append("g")
+		.attr("class", "axis axis--x")
+		.attr("transform", "translate(0," + height2 + ")")
+		.call(xcAxis);
+	}
+	
+	
+	
+    //Gestion des données de températures
+	function displayTemp(data) {
+	  
+	  //Préparation de la coloration des courbes
+	  focus.append("linearGradient")
+		  .attr("id", "temperature-gradient")
+		  .attr("gradientUnits", "userSpaceOnUse")
+		  .attr("x1", 0).attr("y1", y(-0.2))
+		  .attr("x2", 0).attr("y2", y(+0.2))
+		.selectAll("stop")
+		  .data([
+				  {offset: "0%", color: "green"},
+				  {offset: "50%", color: "green"},
+				  {offset: "50%", color: "red"},
+				  {offset: "100%", color: "red"}
+				])
+		  .enter().append("stop")
+			  .attr("offset", function(d) { return d.offset; })
+			  .attr("stop-color", function(d) { return d.color; });
+	
+	  context.append("linearGradient")
+		  .attr("id", "temperature-gradient-context")
+		  .attr("gradientUnits", "userSpaceOnUse")
+		  .attr("x1", 0).attr("y1", yc(-0.2))
+		  .attr("x2", 0).attr("y2", yc(+0.2))
+		.selectAll("stop")
+		  .data([
+				  {offset: "0%", color: "green"},
+				  {offset: "50%", color: "green"},
+				  {offset: "50%", color: "red"},
+				  {offset: "100%", color: "red"}
+				])
+		  .enter().append("stop")
+			  .attr("offset", function(d) { return d.offset; })
+			  .attr("stop-color", function(d) { return d.color; });
+	  
+      //Affichage de la ligne des températures
+      line_chart.selectAll("path").data([data]).enter().append("path")
+        .attr("class", "line")
+        .attr("d", line);
+	
+	  //Placement de la ligne de température moyenne
+	  focus.append("g")
+		.attr("id", "mean_line")
+        .attr("transform", "translate(0, " + y(0) + ")")
+        .append("line")
+        .attr("x2", width - margin.right);
+		
+	  //Affichage de la ligne des températures (partie context)
+	  context.append("path")
+        .datum(data)
+        .attr("class", "line_context")
+        .attr("d", lineContext);
+		
+	  //Fenêtre sur laquelle la sélection d'un intervalle est possible (context)
+	  context.append("g")
+		.attr("class", "brush")
+		.call(brush)
+		.call(brush.move, x.range());
+	  
+	  //Fenêtre sur laquelle l'action de zoom est possible (focus)
+	  svg.append("rect")
+		.attr("class", "zoom")
+		.attr("width", width - margin.right)
+		.attr("height", height)
+		.call(zoom);
+    }
+    
+    
+	
+    //Gestion des données relatives aux ouragans, tornades...
+	function displayTorn(data) {
+	  //Remonte la zone au premier plan (par-dessus rect.zoom) pour permettre les event mouse
+	  bars_chart.raise();
+
+      //Affichage de l'histogramme
+      addTorn(data);
+    }
+	
+	//Calcule le nombre d'ouragans, tornades, etc. par année
+	function computeNbTornadoes(data) {
+	
+	  //Calcul du nombre par année
+	  var nb_tornadoes = new Object();
+	  data.forEach(function(d) {
+		if (d.year_start != d.year_end) {
+			if (Object.keys(nb_tornadoes).includes(d.year_end))
+				nb_tornadoes[d.year_end] += 1;
+			else 
+				nb_tornadoes[d.year_end] = 1;
+		}
+		
+		if (Object.keys(nb_tornadoes).includes(d.year_start))
+			nb_tornadoes[d.year_start] += 1;
+		else
+			nb_tornadoes[d.year_start] = 1;
+      });
+	  
+	  //Transformation de l'objet
+	  var tornadoes = [];
+	  for (var key in nb_tornadoes){
+		var t = new Object();
+		t["date"] = key;
+		t["nb"] = nb_tornadoes[key];
+		tornadoes.push(t);
+	  }
+	  
+	  return tornadoes;
+	}
+	
+	function updateTorn(data) {
+	console.log(data);
+	
+	  //Suppression des anciennes marques
+	  bars_chart.selectAll("rect").remove();
+	  
+	  //Réajustement de l'échelle avant ajout des nouvelles marques
+	  xtorn.domain(data.map(function(d) { return d.date; }));
+	  addTorn(data);
+	}
+	
+	function addTorn(data) {
+	
+      //Affichage des rectangles
+      bars_chart.selectAll("rect").data(data)
+		.enter().append("rect")
+		.style("fill", "none")
+        .style("stroke", "black")
+	    .attr("width", function(d) { return xtorn.bandwidth(); })
+		.attr("height", function(d) { return ytorn(d.nb); })
+		.attr("x", function(d) { return xtorn(d.date); })
+		.attr("y",  function(d) { return height - ytorn(d.nb); });
+	
+	}
+	
+	
+	
+	//Gestion des actions de déplacement/redimensionnement de la fenêtre de la partie basse
+	function brushed() {
+	  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+	  
+	  //Définition du nouveau domain en X
+	  var s = d3.event.selection || xc.range();
+	  x.domain(s.map(xc.invert, xc));
+	  
+	  //Mise-à-jour du linechart, de l'axe et du cadre
+	  line_chart.select(".line").attr("d", line);
+	  focus.select(".axis--x").call(xAxis);
+	  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+		  .scale((width - margin.right) / (s[1] - s[0]))
+		  .translate(-s[0], 0));
+		  
+	  //Filtrage des tornades selon les dates du nouvel intervalle pour affichage
+	  var newXExtent = s.map(xc.invert, xc);
+	  var newTornadoes = filterByDates(torn, newXExtent[0], newXExtent[1]);
+	  updateTorn(newTornadoes);
+	}
+
+	//Gestion des actions de zoom sur le graphique
+	function zoomed() {
+	  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+	  
+	  //Définition du nouveau domain en X
+	  var t = d3.event.transform;
+	  x.domain(t.rescaleX(xc).domain());
+	  
+	  //Mise-à-jour du linechart, de l'axe et du cadre
+	  line_chart.select(".line").attr("d", line);
+	  focus.select(".axis--x").call(xAxis);
+	  context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+	  
+	  //Filtrage des tornades selon les dates du nouvel intervalle pour affichage
+	  var newXExtent = t.rescaleX(xc).domain();
+	  var newTornadoes = filterByDates(torn, newXExtent[0], newXExtent[1]);
+	  updateTorn(newTornadoes);
+	}
+	
+	//Filtre les données de manière à ne conserver que celles comprises entre deux dates
+	function filterByDates(data, date_start, date_end) {
+	  var newData = data.filter(function (d){
+		  let date = new Date(d.date);
+		  return date >= date_start && date <= date_end;
+		});
+	  return newData;
+	}
+    
+  </script>
+</body>
