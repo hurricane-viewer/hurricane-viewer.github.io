@@ -38,7 +38,8 @@ async function main() {
     const yearSlider = document.querySelector('#hurricane-year-slider')
 
     yearSlider.addEventListener('change', _ => {
-       EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
+        hurricanesPoints.selectAll('g').remove()
+        EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
     })
 
     EventEngine.registerTo(EventEngine.EVT.sliderTimeChange, date => {

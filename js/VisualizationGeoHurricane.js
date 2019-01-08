@@ -4,6 +4,8 @@ async function GeoHurricane(svg) {
 	let width = 720,
 		height = 480
 
+	const startDate = new Date('01/01/1970')
+
 	const nbYearsToKeep = 10
 	const opacityChange = 1 / nbYearsToKeep
 
@@ -68,10 +70,6 @@ async function GeoHurricane(svg) {
 		.attr('y', '2em')
 		.attr('class', 'mono')
 
-	function clearAll() {
-		hurricanesPoints.selectAll('g').remove()
-	}
-
 	function filterHurricanes(season) {
 		displayed = allHurricanes.filter(h => h.values[0].year === season)
 
@@ -129,7 +127,6 @@ async function GeoHurricane(svg) {
 			
 			if (date >= endDate) {
 				clearInterval(addTimeInterval)
-				// playSeason(season + 1)
 				EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, endDate)
 			}
 		}, playTimeInterval)
@@ -170,6 +167,7 @@ async function GeoHurricane(svg) {
 	}
 
 	window.addEventListener('resize', resize)
+	EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, startDate)
 }
 
 function GeoHurricaneFocus(svg, txtDiv) {
