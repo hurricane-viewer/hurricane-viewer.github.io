@@ -31,7 +31,7 @@ async function main() {
     const yearSlider = document.querySelector('#hurricane-year-slider')
 
     yearSlider.addEventListener('change', _ => {
-        hurricanesPoints.selectAll('g').remove()
+        d3.selectAll('g.hurricanes g').remove()
         EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
     })
 
