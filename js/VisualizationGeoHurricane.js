@@ -28,6 +28,8 @@ async function GeoHurricane(svg) {
 	const map = svg.append('g')
 
 	const landPath = map.append('path').attr('class', 'land')
+
+	const citiesPoints = map.append('g').attr('class', 'cities')
 	// const hurricanesPath = map.append('g').attr('class', 'hurricanes')
 	// 	.style('stroke', '#000')
 	// 	.style('stroke-width', .1)
@@ -55,6 +57,10 @@ async function GeoHurricane(svg) {
 	// const color3 = d3.scaleLinear().domain([1850, 2016])
 	// 	.interpolate(d3.interpolateHcl)
 	// 	.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+
+	const color4 = d3.scaleLinear().domain([0, 10000000])
+		.interpolate(d3.interpolateHcl)
+		.range([d3.rgb("#a8ddb5"), d3.rgb('#084081')])
 		
 	// Load storms data
 	const data = await getHurricaneData()
@@ -155,6 +161,17 @@ async function GeoHurricane(svg) {
 
 		landPath.datum({type: 'FeatureCollection', features: landGeojson.features})
 			.attr('d', geoGenerator)
+	})
+
+	d3.csv('json/geonames_cities100000.csv', function (err, json) {
+		citiesPoints.selectAll('rect')
+			.data(json)
+			.enter()
+			.append('rect')
+				.attr('transform', d => `translate(${projection([+d.longitude, +d.latitude])})`)
+				.attr('width', d => Math.sqrt(d.population) / 1000)
+				.attr('height', d => Math.sqrt(d.population) / 1000)
+				.attr('fill', d => color4(d.population))
 	})
 
 	// Resize svg to window
