@@ -36,7 +36,7 @@ async function GeoHurricane(svg) {
 	// 	.style('fill', 'none')
 		// .style('opacity', .1)
 
-	const hurricanesPoints = map.append('g')
+	const hurricanesPoints = map.append('g').attr('class', 'hurricanes')
 
 	const zoom = d3.zoom()
 		.scaleExtent([1, 8])
