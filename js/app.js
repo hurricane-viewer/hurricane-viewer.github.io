@@ -8,7 +8,6 @@ const ID_GEO_HURRICANE = '#geohurricane'
 const ID_HURRICANE_PROPERTY = '#hurricaneproperty'
 
 const ID_PLANET_HEATING_VIZ = '#planetheating-viz'
-const ID_PLANET_HEATING_TXT = '#planetheating-txt'
 
 // ------------------------------------------------------------------------------
 // --------------------------------------------- DATA VIZ MANAGEMENT ------------
@@ -19,14 +18,13 @@ async function main() {
     var hurricanePropertySvg = d3.select(ID_HURRICANE_PROPERTY).append('svg')
     
     var planetHeatingSvg = d3.select(ID_PLANET_HEATING_VIZ).append('svg')
-    var planetHeatingTxt = d3.select(ID_PLANET_HEATING_TXT)
     
     // --- launch dataviz
     await GeoHurricane(geoHurricaneSvg)
     
     await HurricaneProperty(hurricanePropertySvg)
     
-    PlanetHeating(planetHeatingSvg, planetHeatingTxt)
+    PlanetHeating(planetHeatingSvg)
 
     const yearSlider = document.querySelector('#hurricane-year-slider')
 
