@@ -1,101 +1,91 @@
 'use strict'
 
+//Marges
+var margin = {top: 20, right: 20, bottom: 110, left: 40},
+	margin2 = {top: 420, right: 30, bottom: 30, left: 40},
+	width = 960 - margin.left - margin.right,
+	height = 500 - margin.top - margin.bottom,
+	height2 = 500 - margin2.top - margin2.bottom;
+	
+//Couleurs pour les cercles (Blind frendly ; photocopy, LCD et print friendly)
+var red = "#de2d26";
+var green = "#31a354";
 
-  
-    //Marges
-    var margin = {top: 20, right: 20, bottom: 110, left: 40},
-		margin2 = {top: 420, right: 30, bottom: 30, left: 40},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
-		height2 = 500 - margin2.top - margin2.bottom;
-		
-	//Couleurs pour les cercles (Blind frendly ; photocopy, LCD et print friendly)
-	var red = "#de2d26";
-	var green = "#31a354";
+
+/**/
+
+
+//Fonctions pour le parsage/formatage des dates/valeurs
+var parseDate = d3.timeParse("%Y-%m-%d");
+var displayYear = d3.timeFormat("%Y");
+var displayValue = d3.format(",.0f");
+
+//Echelle temporelle en X (temps)
+var x = d3.scaleTime().range([0, width - margin.right]);
+var xc = d3.scaleTime().range([0, width - margin.right]);
+var xAxis = d3.axisBottom().scale(x);
+var xcAxis = d3.axisBottom().scale(xc);
 	
+//Echelle linéaire en Y (température)
+var y = d3.scaleLinear().range([height, 0]);
+var yc = d3.scaleLinear().range([height2, 0]);
+var yAxis = d3.axisLeft().scale(y);
+
+//Echelle ordinale en X et linéaire en Y (nombre d'ouragans)
+var xtorn =  d3.scaleBand().range([0, width - margin.right]);
+var ytorn =  d3.scaleLinear().range([0, height]);
+
+
+/**/
+
+
+//Préparation de la courbe joignant les données
+var line = d3.line()
+	.x(function(d) { return x(d.date); })
+	.y(function(d) { return y(d.value); })
+	.curve(d3.curveBasis);
 	
-	/**/
+var lineContext = d3.line()
+	.x(function(d) { return xc(d.date); })
+	.y(function(d) { return yc(d.value); })
+	.curve(d3.curveBasis);
+
+
+//Préparation pour zoom et déplacement
+
+var brush = d3.brushX()
+	.extent([[0, 0], [width - margin.right, height2]])
+	.on("brush end", brushed);
 	
-    
-    //Fonctions pour le parsage/formatage des dates/valeurs
-    var parseDate = d3.timeParse("%Y-%m");
-	var parseDate2 = d3.timeParse("%Y-%m-%d");
-    var displayMonth = d3.timeFormat("%m");
-	var displayYear = d3.timeFormat("%Y");
-    var displayValue = d3.format(",.0f");
-	
-	var frenchMonths = ["Janvier", "Février",  "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-    
-    //Echelle temporelle en X (temps)
-    var x = d3.scaleTime().range([0, width - margin.right]);
-	var xc = d3.scaleTime().range([0, width - margin.right]);
-    var xAxis = d3.axisBottom().scale(x);
-	var xcAxis = d3.axisBottom().scale(xc);
-		
-	//Echelle linéaire en Y (température)
-    var y = d3.scaleLinear().range([height, 0]);
-	var yc = d3.scaleLinear().range([height2, 0]);
-    var yAxis = d3.axisLeft().scale(y);
-	
-	//Echelle ordinale en X et linéaire en Y (nombre d'ouragans)
-	var xtorn =  d3.scaleBand().range([0, width - margin.right]);
-	var ytorn =  d3.scaleLinear().range([0, height]);
-	
-	
-	/**/
-	
-	
-    
-    //Préparation de la courbe joignant les données
-    var line = d3.line()
-        .x(function(d) { return x(d.date); })
-        .y(function(d) { return y(d.value); })
-    	.curve(d3.curveBasis);
-		
-	var lineContext = d3.line()
-        .x(function(d) { return xc(d.date); })
-        .y(function(d) { return yc(d.value); })
-    	.curve(d3.curveBasis);
-    
-	
-	
-	//Préparation pour zoom et déplacement
-	
-	var brush = d3.brushX()
-		.extent([[0, 0], [width - margin.right, height2]])
-		.on("brush end", brushed);
-		
-	var zoom = d3.zoom()
-		.scaleExtent([1, Infinity])
-		.translateExtent([[0, 0], [width, height]])
-		.extent([[0, 0], [width, height]])
-		.on("zoom", zoomed);
-		
-		
-	/**/
-	
-	var svg;
-	var context;
-	var focus;
-	var line_chart;
-	var bars_chart;
-	
-	var clip;
-	
-	
-	var torn;
-	
+var zoom = d3.zoom()
+	.scaleExtent([1, Infinity])
+	.translateExtent([[0, 0], [width, height]])
+	.extent([[0, 0], [width, height]])
+	.on("zoom", zoomed);
+
+
+/**/
+
+
+var svg;
+var context;
+var focus;
+var line_chart;
+var bars_chart;
+
+var clip;
+
+var torn;
+
 
 function PlanetHeating(svg_param) {
-
-
+	
     //Canvas SVG dans lequel dessiner les graphiques
     svg = svg_param
 		.attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + (margin.top / 2) + ")");
-	
 	
 	
 	//Séparation de l'espace svg en deux (context = partie inférieure, focus = zone principale)
@@ -107,26 +97,23 @@ function PlanetHeating(svg_param) {
 	bars_chart = svg.append("g").attr("id", "bars");
 	
 	
-	
     //Noms des axes
     focus.append("text")
       .attr("x", 15)
       .attr("y", 10)
 	  .attr("class", "axis_title")
-	  .text("Écart par rapport à la température moyenne");
+	  .text("Difference from mean reference");
     focus.append("text")
       .attr("x", 15)
       .attr("y", 30)
 	  .attr("class", "axis_title")
-	  .text("de référence (1951-1980) en °C");
+	  .text("temperature (1951-1980) in °C");
     focus.append("text")
       .attr("x", width - 70)
       .attr("y", height - 15)
 	  .attr("class", "axis_title")
-      .text("Années");
+      .text("Years");
     
-	
-	
 		
 	clip = svg.append("defs").append("svg:clipPath")
         .attr("id", "clip")
@@ -167,7 +154,7 @@ function createChart(error, temperatures, tornadoes) {
 	  
   //Parsage des dates
   temperatures.forEach(function(d) {
-	d.date = parseDate2(d.Date);
+	d.date = parseDate(d.Date);
 	d.value = +d.Mean;
   });
   //Parsage des dates et formatage pour affichage
@@ -175,16 +162,8 @@ function createChart(error, temperatures, tornadoes) {
 	d.date_start = d3.min(d.values, function(da) { return da.timestamp });
 	d.date_end = d3.max(d.values, function(da) { return da.timestamp });
 	
-	let month_start = frenchMonths[parseInt(displayMonth(d.date_start)) - 1];
-	let month_end = frenchMonths[parseInt(displayMonth(d.date_end)) - 1];
-	let year_start = displayYear(d.date_start);
-	let year_end = displayYear(d.date_end);
-	
-	d.full_date_start = month_start + " " + year_start;
-	d.full_date_end = month_end + " " + year_end;
-	
-	d.year_start = year_start;
-	d.year_end = year_end;
+	d.year_start = displayYear(d.date_start);
+	d.year_end = displayYear(d.date_end);
   });
   
   //Calcul du nombre d'ouragans par an
@@ -199,20 +178,6 @@ function createChart(error, temperatures, tornadoes) {
   
   xtorn.domain(nb_tornadoes.map(function(d) { return d.date; }));
   ytorn.domain([0, d3.max(nb_tornadoes, function(d) { return d.nb; })]);
-  
-  
-  
-  console.log(temperatures)
-  console.log(d3.extent(temperatures, function(d) { return d.value; }));
-  console.log(d3.extent(temperatures, function(d) { return d.date; }));
-  console.log(tornadoes);
-  var minDateStart = d3.min(tornadoes, function(d) { return d.year_start; });
-  var maxDateEnd = d3.max(tornadoes, function(d) { return d.year_end; });
-  console.log([minDateStart, maxDateEnd]);
-  console.log([0, d3.max(nb_tornadoes, function(d) { return d.nb; })]);
-  console.log(nb_tornadoes);
-
-  
   
   torn = nb_tornadoes;
   
@@ -348,8 +313,6 @@ function computeNbTornadoes(data) {
 }
 
 function updateTorn(data) {
-console.log(data);
-
   //Suppression des anciennes marques
   bars_chart.selectAll("rect").remove();
   
