@@ -34,7 +34,8 @@ svg {
     "gTxt gTxt gTxt gViz gViz"
     "prop prop prop prop prop"
     "hTit hTit hTit hTit hTit"
-    "hViz hViz hTxt hTxt hTxt";
+    "hViz hViz hViz hViz hViz"
+    "hTxt hTxt hTxt hTxt hTxt";
 }
 
 /* ------------------------------------------------------------------ */
@@ -88,7 +89,7 @@ header {
   grid-area: hViz;
 }
 
-.planetheating-txt {
+footer {
   grid-area: hTxt;
 }
 
