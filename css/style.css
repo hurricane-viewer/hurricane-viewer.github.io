@@ -68,6 +68,10 @@ header {
   visibility: hidden;
 }
 
+.geohurricane .color-legend {
+  
+}
+
 
 .geofocus-txt {
   grid-area: gTxt;

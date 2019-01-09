@@ -4,7 +4,7 @@ async function GeoHurricane(svg) {
 	let width = 720,
 		height = 480
 
-	const startDate = new Date('01/01/1970')
+	const startDate = new Date('01/01/1995')
 
 	const nbYearsToKeep = 10
 	const opacityChange = 1 / nbYearsToKeep
@@ -46,19 +46,19 @@ async function GeoHurricane(svg) {
 		})
 	svg.call(zoom)
 
-	const color = d3.scaleLinear().domain([0, 140])
+	const colorScaleWind = d3.scaleLinear().domain([0, 140])
 		.interpolate(d3.interpolateHcl)
 		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
 
-	const color2 = d3.scaleSequential()
+	const colorScaleSeason = d3.scaleSequential()
 		.domain([1, 12])
 		.interpolator(d3.interpolateRainbow)
 
-	// const color3 = d3.scaleLinear().domain([1850, 2016])
-	// 	.interpolate(d3.interpolateHcl)
-	// 	.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+	const colorScaleYear = d3.scaleLinear().domain([1850, 2016])
+		.interpolate(d3.interpolateHcl)
+		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
 
-	const color4 = d3.scaleLinear().domain([0, 10000000])
+	const colorScalePopulation = d3.scaleLinear().domain([0, 10000000])
 		.interpolate(d3.interpolateHcl)
 		.range([d3.rgb("#a8ddb5"), d3.rgb('#084081')])
 		
@@ -71,10 +71,71 @@ async function GeoHurricane(svg) {
 	let date
 	let addTimeInterval
 
-	const currentDateText = map.append('text')
+	const currentDateText = svg.append('text')
 		.attr('x', '2em')
 		.attr('y', '2em')
 		.attr('class', 'mono')
+	
+	const legendheight = 200,
+		legendwidth = 70,
+		margin = {top: 10, right: 60, bottom: 10, left: 2}
+	
+	const colorLegend = d3.select('#color-legend')
+		.style('height', legendheight + 'px')
+		.style('width', legendwidth + 'px')
+		.style('position', 'absolute')
+		.style('margin-top', '40px')
+		.style('margin-left', '30px')
+
+	updateColorLegend(colorScaleWind)
+	function updateColorLegend(colorScale) {
+		colorLegend.select('.axis').remove()
+
+		const canvas = colorLegend
+			.append('canvas')
+			.attr('height', legendheight - margin.top - margin.bottom)
+			.attr('width', 1)
+			.style('height', (legendheight - margin.top - margin.bottom) + 'px')
+			.style('width', (legendwidth - margin.left - margin.right) + 'px')
+			.style('border', '1px solid #000')
+			.style('position', 'absolute')
+			.style('top', margin.top + 'px')
+			.style('left', margin.left + 'px')
+			.node()
+
+		const ctx = canvas.getContext('2d')
+		const legendscale = d3.scaleLinear()
+			.range([1, legendheight - margin.top - margin.bottom])
+			.domain(colorScale.domain())
+
+		const image = ctx.createImageData(1, legendheight)
+		d3.range(legendheight).forEach(function(i) {
+			var c = d3.rgb(colorScale(legendscale.invert(i)))
+			image.data[4*i] = c.r
+			image.data[4*i + 1] = c.g
+			image.data[4*i + 2] = c.b
+			image.data[4*i + 3] = 255
+		})
+		ctx.putImageData(image, 0, 0)
+
+		const legendaxis = d3.axisRight()
+			.scale(legendscale)
+			.tickSize(6)
+			.ticks(8)
+
+		const svg = colorLegend
+			.append('svg')
+			.attr('height', (legendheight) + 'px')
+			.attr('width', (legendwidth) + 'px')
+			.style('position', 'absolute')
+			.style('left', '8px')
+			.style('top', '0px')
+		svg
+			.append('g')
+			.attr('class', 'axis')
+			.attr('transform', `translate(${(legendwidth - margin.left - margin.right + 3)},${margin.top})`)
+			.call(legendaxis)
+	}
 
 	function filterHurricanes(season) {
 		displayed = allHurricanes.filter(h => h.values[0].year === season)
@@ -92,7 +153,7 @@ async function GeoHurricane(svg) {
 				.append('circle')
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
 					.attr('r', d => .75 + d.wind / 75)
-					.attr('fill', d => d.wind ? color(d.wind) : '#999')
+					.attr('fill', d => d.wind ? colorScaleWind(d.wind) : '#999')
 					// .attr('fill', d => color2(d.timestamp.getMonth()))
 					.attr('class', 'hidden')
 
@@ -171,7 +232,7 @@ async function GeoHurricane(svg) {
 				.attr('transform', d => `translate(${projection([+d.longitude, +d.latitude])})`)
 				.attr('width', d => Math.sqrt(d.population) / 1000)
 				.attr('height', d => Math.sqrt(d.population) / 1000)
-				.attr('fill', d => color4(d.population))
+				.attr('fill', d => colorScalePopulation(d.population))
 	})
 
 	// Resize svg to window
