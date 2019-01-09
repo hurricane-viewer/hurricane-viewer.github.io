@@ -87,6 +87,15 @@ async function HurricaneProperty(svg) {
   innerG.append("g")
     .attr('class','y_axis')
 
+  innerG.append("text")
+    .attr("x", 15)
+    .attr("y", bottomMargin)
+    .text("Wind intensity (node)")
+  innerG.append("text")
+    .attr("x", width - 200)
+    .attr("y", height - bottomMargin - 30)
+    .text("Hurricane duration")
+
   let displayG = innerG.append('g')
 
 
@@ -334,6 +343,7 @@ async function HurricaneProperty(svg) {
     let alreadySelected = index > -1
 
     if(alreadySelected) {
+      EventEngine.registerTo(EventEngine.EVT.hurricaneMouseExit, hurId)
       selectedHurricanes.splice(index,1)
       updateView()
     }
