@@ -310,6 +310,11 @@ function computeNbTornadoes(data) {
 	tornadoes.push(t);
   }
   
+  //Filtre par rapport aux données de températures
+  var tornadoes = tornadoes.filter(function (d){
+	  return d.date >= "1880";
+	});
+  
   return tornadoes;
 }
 
