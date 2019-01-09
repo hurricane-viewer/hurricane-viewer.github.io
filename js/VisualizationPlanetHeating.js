@@ -102,17 +102,17 @@ function PlanetHeating(svg_param) {
       .attr("x", 15)
       .attr("y", 10)
 	  .attr("class", "axis_title")
-	  .text("Écart par rapport à la température moyenne");
+	  .text("Difference from mean reference");
     focus.append("text")
       .attr("x", 15)
       .attr("y", 30)
 	  .attr("class", "axis_title")
-	  .text("de référence (1951-1980) en °C");
+	  .text("temperature (1951-1980) in °C");
     focus.append("text")
       .attr("x", width - 70)
       .attr("y", height - 15)
 	  .attr("class", "axis_title")
-      .text("Années");
+      .text("Years");
     
 		
 	clip = svg.append("defs").append("svg:clipPath")
