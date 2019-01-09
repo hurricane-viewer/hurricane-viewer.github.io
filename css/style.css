@@ -39,7 +39,7 @@ input[type=range] {
   width: 50%;
   height: 6px;
   background-color: #ccc;
-  background-image: linear-gradient(#aaa, #aaa);
+  background-image: linear-gradient(to left, #aaa, #ddd);
   background-size: 50% 100%;
   background-repeat: no-repeat;
   border-radius: 10px;
@@ -126,11 +126,16 @@ header {
 }
 
 .geohurricane .controls input {
-  width: calc(100% - 150px);
+  width: calc(100% - 200px);
 }
 
 .geohurricane .controls select {
-  float: right;
+  margin-right: 15px;
+}
+
+.geohurricane .controls .mono {
+  margin-left: 20px;
+  vertical-align: -webkit-baseline-middle;
 }
 
 .geohurricane .land {

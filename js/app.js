@@ -26,17 +26,22 @@ async function main() {
     
     PlanetHeating(planetHeatingSvg)
 
-    const yearSlider = document.querySelector('#hurricane-year-slider')
+    const yearSlider = document.getElementById('hurricane-year-slider')
+    const yearText = document.getElementById('hurricane-year-text')
 
     yearSlider.addEventListener('change', _ => {
-        EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
         yearSlider.setAttribute('style', `background-size:${(yearSlider.value - 1842) * 100 / 174}% 100%`)
+        yearText.innerHTML = yearSlider.value
+
+        EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
         d3.selectAll('g.hurricanes g').remove()
     })
 
     EventEngine.registerTo(EventEngine.EVT.sliderTimeChange, date => {
         const year = date.getFullYear()
         yearSlider.value = year
+        yearText.innerHTML = year
+
         yearSlider.setAttribute('style', `background-size:${(year - 1842) * 100 / 174}% 100%`)
     })
 
