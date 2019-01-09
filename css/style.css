@@ -55,7 +55,11 @@ header {
 }
 
 .geohurricane .controls input {
-  width: 100%;
+  width: calc(100% - 150px);
+}
+
+.geohurricane .controls select {
+  float: right;
 }
 
 .geohurricane .land {
