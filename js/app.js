@@ -29,13 +29,18 @@ async function main() {
     const yearSlider = document.querySelector('#hurricane-year-slider')
 
     yearSlider.addEventListener('change', _ => {
-        d3.selectAll('g.hurricanes g').remove()
         EventEngine.triggerEvent(EventEngine.EVT.sliderTimeChange, new Date(`01/01/${yearSlider.value}`))
+        yearSlider.setAttribute('style', `background-size:${(yearSlider.value - 1842) * 100 / 174}% 100%`)
+        d3.selectAll('g.hurricanes g').remove()
     })
 
     EventEngine.registerTo(EventEngine.EVT.sliderTimeChange, date => {
-        yearSlider.value = date.getFullYear()
+        const year = date.getFullYear()
+        yearSlider.value = year
+        yearSlider.setAttribute('style', `background-size:${(year - 1842) * 100 / 174}% 100%`)
     })
+
+    yearSlider.setAttribute('style', `background-size:${(yearSlider.value - 1842) * 100 / 174}% 100%`)
 }
 
 main()
