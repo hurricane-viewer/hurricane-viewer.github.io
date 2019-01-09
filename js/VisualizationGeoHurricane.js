@@ -84,10 +84,59 @@ async function GeoHurricane(svg) {
 		.style('height', legendheight + 'px')
 		.style('width', legendwidth + 'px')
 		.style('position', 'absolute')
-		.style('margin-top', '40px')
-		.style('margin-left', '30px')
+		.style('margin-top', '60px')
+		.style('margin-left', '40px')
 
-	updateColorLegend(colorScaleWind)
+	const legendText = svg.append('text')
+		.attr('x', '2em')
+		.attr('y', '3.5em')
+		.attr('class', 'mono')
+
+	let currentScale = 'wind'
+	setGeoColor('wind')
+	function setGeoColor(type) {
+		if (type) {
+			switch (type) {
+				case 'wind':
+					updateColorLegend(colorScaleWind)
+					legendText.text('Wind (knots)')
+					break
+				
+				case 'season':
+					updateColorLegend(colorScaleSeason)
+					legendText.text('Season (month)')
+					break
+	
+				case 'year':
+					updateColorLegend(colorScaleYear)
+					legendText.text('Year')
+					break
+			}
+		} else {
+			type = currentScale
+		}
+
+		switch (type) {
+			case 'wind':
+				hurricanesPoints
+					.selectAll('circle')
+					.attr('fill', d => d.wind ? colorScaleWind(d.wind) : '#999')
+				break
+			
+			case 'season':
+				hurricanesPoints
+					.selectAll('circle')
+					.attr('fill', d => colorScaleSeason(d.timestamp.getMonth()))
+				break
+
+			case 'year':
+				hurricanesPoints
+					.selectAll('circle')
+					.attr('fill', d => colorScaleYear(d.year))
+				break
+		}
+	}
+
 	function updateColorLegend(colorScale) {
 		colorLegend.select('.axis').remove()
 
@@ -153,13 +202,15 @@ async function GeoHurricane(svg) {
 				.append('circle')
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
 					.attr('r', d => .75 + d.wind / 75)
-					.attr('fill', d => d.wind ? colorScaleWind(d.wind) : '#999')
-					// .attr('fill', d => color2(d.timestamp.getMonth()))
+					// .attr('fill', d => d.wind ? colorScaleWind(d.wind) : '#999')
+					// // .attr('fill', d => color2(d.timestamp.getMonth()))
 					.attr('class', 'hidden')
 
 					.on('click', d => {
 						EventEngine.triggerEvent(EventEngine.EVT.hurricaneSelected, d.id)
 					})
+		
+		setGeoColor()
 
 		for (let i = 1; i < nbYearsToKeep; i++) {
 			hurricanesPoints
