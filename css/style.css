@@ -31,6 +31,58 @@ select {
   text-transform: none;
 }
 
+
+input[type=range] {
+  margin: auto;
+  outline: none;
+  padding: 0;
+  width: 50%;
+  height: 6px;
+  background-color: #ccc;
+  background-image: linear-gradient(#aaa, #aaa);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  box-shadow: none;
+  border: none;
+  background: transparent;
+  -webkit-appearance: none;
+}
+
+input[type=range]::-moz-range-track {
+  box-shadow: none;
+  border: none;
+  background: transparent;
+}
+
+input[type=range]::-moz-focus-outer {
+  border: 0;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  background: #777;
+  border-radius: 100%;
+  box-shadow: 0 0 1px 0px rgba(0,0,0,0.1);
+  -webkit-appearance: none;
+}
+
+input[type=range]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  background: #777;
+  border-radius: 100%;
+  box-shadow: 0 0 1px 0px rgba(0,0,0,0.1);
+}
+
 /* ------------------------------------------------------------------ */
 /* --------------------------    DISPLAY   -------------------------- */
 
