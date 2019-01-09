@@ -112,6 +112,7 @@ async function GeoHurricane(svg) {
 					legendText.text('Year')
 					break
 			}
+			currentScale = type
 		} else {
 			type = currentScale
 		}
@@ -186,6 +187,11 @@ async function GeoHurricane(svg) {
 			.call(legendaxis)
 	}
 
+	const colorScaleChooser = document.getElementById('hurricane-color-select')
+	colorScaleChooser.addEventListener('change', _ => {
+		setGeoColor(colorScaleChooser.value)
+	})
+
 	function filterHurricanes(season) {
 		displayed = allHurricanes.filter(h => h.values[0].year === season)
 
@@ -202,8 +208,6 @@ async function GeoHurricane(svg) {
 				.append('circle')
 					.attr('transform', d => `translate(${projection([d.lon, d.lat])})`)
 					.attr('r', d => .75 + d.wind / 75)
-					// .attr('fill', d => d.wind ? colorScaleWind(d.wind) : '#999')
-					// // .attr('fill', d => color2(d.timestamp.getMonth()))
 					.attr('class', 'hidden')
 
 					.on('click', d => {
