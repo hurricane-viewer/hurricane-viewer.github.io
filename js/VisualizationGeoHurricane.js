@@ -42,7 +42,9 @@ async function GeoHurricane(svg) {
 		.scaleExtent([1, 8])
 		.translateExtent([[0, 0], [width, height]])
 		.on('zoom', _ => {
+
 			map.attr('transform', d3.event.transform)
+			
 		})
 	svg.call(zoom)
 
@@ -212,6 +214,25 @@ async function GeoHurricane(svg) {
 
 					.on('click', d => {
 						EventEngine.triggerEvent(EventEngine.EVT.hurricaneSelected, d.id)
+					})
+					.on('mouseover', d => {
+
+
+						map.append('text')
+						.attr('id', 'hurricaneMouseOverTooltip')
+						.attr('transform', `translate(${projection([d.lon, d.lat])})`)
+						.append('tspan')
+						.text(d.name)
+						.append('tspan')
+						.text(d.time)
+
+						EventEngine.triggerEvent(EventEngine.EVT.hurricaneMouseEnter, d)
+
+					})
+					.on('mouseout', _ => {
+						
+						d3.select('#hurricaneMouseOverTooltip').remove()
+
 					})
 		
 		setGeoColor()

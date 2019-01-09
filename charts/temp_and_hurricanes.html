@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0;
+		   padding: 10px;
+		   background-color: #eee;}
+	
+    .line {
+		fill: none;
+		stroke: url(#temperature-gradient);
+		stroke-width: 1.5px;
+    }
+	.line_context {
+		fill: none;
+		stroke: url(#temperature-gradient-context);
+		stroke-width: 1.5px;
+    }
+	
+	#mean_line {
+		stroke: #aaa;
+		stroke-width: 2px;
+	}
+    
+    .axis_title {
+		font-weight: bold;
+		font-family: Arial;
+		font-size: 10pt;
+    }
+    
+    #tooltip {
+      	font-weight: bold;
+        color: #222;
+        background-color: rgba(255,255,255,.9);
+      
+        padding: .5em .5em .3em 0;
+        text-shadow: #f5f5f5 0 1px 0;
+        border-radius: 5px;
+		border: solid 2px;
+        position: absolute;
+    }
+	#tooltip .title {
+		text-align: center;
+		font-size: large;
+		font-weight: bold;
+		font-family: Arial;
+		
+		border-bottom: solid 2px;
+		padding-bottom: 5px;
+		margin-bottom: 5px;
+		margin-left: .5em;
+	}
+    
+    .hidden {
+        display: none;
+    }
+	
+	.icon {
+		width: 30px;
+		text-align: center;
+		padding: 4px 0px 4px 0px;
+	}
+	
+	.zoom {
+		cursor: move;
+		fill: none;
+		pointer-events: all;
+	}
+  </style>
+</head>
+
+<body>
+  <script>
+    //Marges
+    var margin = {top: 20, right: 20, bottom: 110, left: 40},
+		margin2 = {top: 420, right: 30, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+		height2 = 500 - margin2.top - margin2.bottom;
+		
+	//Couleurs pour les cercles (Blind frendly ; photocopy, LCD et print friendly)
+	var red = "#de2d26";
+	var green = "#31a354";
+
+    //Canvas SVG dans lequel dessiner les graphiques
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + (margin.top / 2) + ")");
+    
+    //Fonctions pour le parsage/formatage des dates/valeurs
+    var parseDate = d3.timeParse("%Y-%m");
+    var displayMonth = d3.timeFormat("%m");
+	var displayYear = d3.timeFormat("%Y");
+    var displayValue = d3.format(",.0f");
+	
+	var frenchMonths = ["Janvier", "Février",  "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    
+    //Echelle temporelle en X (temps)
+    var x = d3.scaleTime().range([0, width - margin.right]);
+	var xc = d3.scaleTime().range([0, width - margin.right]);
+    var xAxis = d3.axisBottom().scale(x);
+	var xcAxis = d3.axisBottom().scale(xc);
+		
+	//Echelle linéaire en Y (température)
+    var y = d3.scaleLinear().range([height, 0]);
+	var yc = d3.scaleLinear().range([height2, 0]);
+    var yAxis = d3.axisLeft().scale(y);
+
+	//Echelle linéaire pour la taille des cercles (intensité)
+	var intensityScale = d3.scaleLinear()
+					.domain([0,10])
+        			.range([4, 25]);
+	
+	
+	//Séparation de l'espace svg en deux (context = partie inférieure, focus = zone principale)
+	var context = svg.append("g")
+		.attr("transform", "translate(" + 0 + "," + margin2.top + ")")
+		.attr("id", "context");
+	var focus = svg.append("g").attr("id", "focus");
+	var line_chart = focus.append("g").attr("clip-path", "url(#clip)");
+	var circles_chart = svg.append("g").attr("id", "circles");
+	
+	
+    //Noms des axes
+    focus.append("text")
+      .attr("x", 15)
+      .attr("y", 10)
+	  .attr("class", "axis_title")
+      .text("Températures (en °C)");
+    text_x = focus.append("text")
+      .attr("x", width - 70)
+      .attr("y", height - 15)
+	  .attr("class", "axis_title")
+      .text("Années");
+
+    //Div qui servira de tooltip
+    var tooltip = d3.select("body").append("div")
+        .attr("id", "tooltip")
+        .attr("class", "hidden");
+    
+    // Préparation de la courbe joignant les données
+    var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.value); })
+    	.curve(d3.curveBasis);
+		
+	var lineContext = d3.line()
+        .x(function(d) { return xc(d.date); })
+        .y(function(d) { return yc(d.value); })
+    	.curve(d3.curveBasis);
+    
+	
+	
+	//Préparation pour zoom et déplacement
+	
+	var brush = d3.brushX()
+		.extent([[0, 0], [width - margin.right, height2]])
+		.on("brush end", brushed);
+		
+	var zoom = d3.zoom()
+		.scaleExtent([1, Infinity])
+		.translateExtent([[0, 0], [width, height]])
+		.extent([[0, 0], [width, height]])
+		.on("zoom", zoomed);
+		
+	var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width - margin.right)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0);	
+    
+	
+	
+	//Attend le chargement des jeux de données avant exécution de la suite
+	d3.queue()
+	  .defer(d3.json, "./data/temp_test.json")
+	  .defer(d3.json, "./data/tornadoes_test.json")
+	  .await(createChart);
+	  
+	var meanTemp;
+	var torn;
+
+	function createChart(error, temperatures, tornadoes) {
+	  if (error) { console.log(error); }
+	  
+	  //Parsage des dates
+      temperatures.forEach(function(d) {
+        d.date = parseDate(d.date);
+      });
+      tornadoes.forEach(function(d) {
+        d.date_start = parseDate(d.date_start);
+		d.date_end = parseDate(d.date_end);
+      });
+	  
+	  //Calculs nécessaires à la synchronisation des axes/échelles
+	  extentDateTemp = d3.extent(temperatures, function(d) { return d.date; });
+	  minDateStart = d3.min(tornadoes, function(d) { return d.date_start; });
+	  maxDateEnd = d3.max(tornadoes, function(d) { return d.date_end; });
+	  extent = [extentDateTemp[0] < minDateStart ? extentDateTemp[0] : minDateStart,
+				extentDateTemp[1] > maxDateEnd ? extentDateTemp[1] : maxDateEnd];	
+	  maxValueTemp = d3.max(temperatures, function(d) { return d.value; });
+	  maxValueTorn = d3.max(tornadoes, function(d) { return d.value; });
+	  
+	  //Ajustement des échelles selon les deux jeux de données
+	  x.domain(extent);
+	  y.domain([0, maxValueTemp > maxValueTorn ? maxValueTemp : maxValueTorn]);
+	  xc.domain(x.domain());
+	  yc.domain(y.domain());
+
+	  meanTemp = d3.mean(temperatures, function(d) { return d.value; });
+	  torn = tornadoes;
+	  
+	  //Contenu du graphique
+	  displayTemp(temperatures, meanTemp);
+	  displayTorn(tornadoes, meanTemp);
+	  
+	  //Mise à jour des axes
+      focus.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+      focus.append("g")
+        .attr("class", "axis axis--y")
+        .attr("transform", "translate(0,0)")
+      	.call(yAxis);
+	  context.append("g")
+		.attr("class", "axis axis--x")
+		.attr("transform", "translate(0," + height2 + ")")
+		.call(xcAxis);
+	}
+	
+	
+	
+    //Gestion des données de températures
+	function displayTemp(data, meanTemp) {
+	  
+	  //Préparation de la coloration des courbes
+	  focus.append("linearGradient")
+		  .attr("id", "temperature-gradient")
+		  .attr("gradientUnits", "userSpaceOnUse")
+		  .attr("x1", 0).attr("y1", y(meanTemp - 10))
+		  .attr("x2", 0).attr("y2", y(meanTemp + 10))
+		.selectAll("stop")
+		  .data([
+				  {offset: "0%", color: "green"},
+				  {offset: "50%", color: "green"},
+				  {offset: "50%", color: "red"},
+				  {offset: "100%", color: "red"}
+				])
+		  .enter().append("stop")
+			  .attr("offset", function(d) { return d.offset; })
+			  .attr("stop-color", function(d) { return d.color; });
+	
+	  context.append("linearGradient")
+		  .attr("id", "temperature-gradient-context")
+		  .attr("gradientUnits", "userSpaceOnUse")
+		  .attr("x1", 0).attr("y1", yc(meanTemp - 10))
+		  .attr("x2", 0).attr("y2", yc(meanTemp + 10))
+		.selectAll("stop")
+		  .data([
+				  {offset: "0%", color: "green"},
+				  {offset: "50%", color: "green"},
+				  {offset: "50%", color: "red"},
+				  {offset: "100%", color: "red"}
+				])
+		  .enter().append("stop")
+			  .attr("offset", function(d) { return d.offset; })
+			  .attr("stop-color", function(d) { return d.color; });
+	  
+      //Affichage de la ligne des températures
+      line_chart.selectAll("path").data([data]).enter().append("path")
+        .attr("class", "line")
+        .attr("d", line);
+	
+	  //Placement de la ligne de température moyenne
+	  focus.append("g")
+		.attr("id", "mean_line")
+        .attr("transform", "translate(0, " + y(meanTemp) + ")")
+        .append("line")
+        .attr("x2", width - margin.right);
+		
+	  //Affichage de la ligne des températures (partie context)
+	  context.append("path")
+        .datum(data)
+        .attr("class", "line_context")
+        .attr("d", lineContext);
+		
+	  //Fenêtre sur laquelle la sélection d'un intervalle est possible (context)
+	  context.append("g")
+		.attr("class", "brush")
+		.call(brush)
+		.call(brush.move, x.range());
+	  
+	  //Fenêtre sur laquelle l'action de zoom est possible (focus)
+	  svg.append("rect")
+		.attr("class", "zoom")
+		.attr("width", width - margin.right)
+		.attr("height", height)
+		.call(zoom);
+    }
+    
+    
+	
+    //Gestion des données relatives aux ouragans, tornades...
+	function displayTorn(data, meanTemp) {
+	
+	  //Remonte la zone au premier plan (par-dessus rect.zoom) pour permettre les event mouse
+	  circles_chart.raise();
+
+      //Formatage des dates pour affichage
+      data.forEach(function(d) {
+		let month_start = frenchMonths[parseInt(displayMonth(d.date_start)) - 1];
+		let month_end = frenchMonths[parseInt(displayMonth(d.date_end)) - 1];
+		let year_start = displayYear(d.date_start);
+		let year_end = displayYear(d.date_end);
+		
+		d.full_date_start = month_start + " " + year_start;
+		d.full_date_end = month_end + " " + year_end;
+      });
+
+      //Ajout des cercles
+      addTorn(data, meanTemp);
+		
+	  //Affichage des cercles (de la partie context)
+      context.selectAll("circle").data(data).enter()
+        .append("circle")
+		.style("fill", function(d) { return d.value < meanTemp ? green : red; })
+        .style("stroke", "black")
+        .attr("r", 3)
+        .attr("cx", function(d) { return xc(d.date_start); })
+        .attr("cy", function(d) { return yc(d.value); });
+    }
+	
+	function updateTorn(data, meanTemp) {
+	  //Suppression des anciennes marques
+	  circles_chart.selectAll("circle").remove();
+	  
+	  //Ajout des nouvelles
+	  addTorn(data, meanTemp);
+	}
+	
+	function addTorn(data, meanTemp) {
+
+      //Affichage des cercles
+      circles_chart.selectAll("circle").data(data)
+		.enter().append("circle")
+		.style("fill", function(d) { return d.value < meanTemp ? green : red; })
+        .style("stroke", "black")
+        .attr("r", function(d) { return intensityScale(d.intensity); })
+        .attr("cx", function(d) { return x(d.date_start); })
+        .attr("cy", function(d) { return y(d.value); })
+      	
+		//Gestion du tooltip
+		.on("mousemove", function(d) {
+          //Coordonnées du curseur
+          var mouse = d3.mouse(svg.node()).map(function(d) {
+            return parseInt(d);
+          });
+		  
+		  //Apparition et contenu
+		  tooltip.classed("hidden", false)
+			.html('<div class="title">' + d.name + '</div>' + 
+                  '<div><i class="far fa-calendar icon"></i>' + d.full_date_start + '</div>' +
+                  '<div><i class="far fa-calendar-times icon"></i>' + d.full_date_end + '</div>' +
+                  '<div><i class="fas fa-cloud-showers-heavy icon"></i>' + d.intensity + '</div>' +
+                  '<div><i class="fas fa-skull-crossbones icon"></i>' + d.death + '</div>' +
+                  '<div><i class="fas fa-dollar-sign icon"></i>' + d.cost + '</div>');
+		  
+		  //Choix du placement du tooltip (gauche/droite)
+		  if (mouse[0] + 70 < 800) {
+			tooltip.attr("style", "left:" + (mouse[0] + 70) + "px; " +
+								  "top:" + (mouse[1] - 35) + "px");
+		  } else {
+			let div = document.getElementById('tooltip');
+			let divWidth = div.offsetWidth;
+			tooltip.attr("style", "left:" + (mouse[0] - divWidth + 20) + "px; " +
+								  "top:" + (mouse[1] - 35) + "px");
+		  }
+        })
+
+      	//Disparition du tooltip
+        .on("mouseout", function() {
+          tooltip.classed("hidden", true);
+        });
+	
+	}
+	
+	
+	
+	//Gestion des actions de déplacement/redimensionnement de la fenêtre de la partie basse
+	function brushed() {
+	  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+	  
+	  //Définition du nouveau domain en X
+	  var s = d3.event.selection || xc.range();
+	  x.domain(s.map(xc.invert, xc));
+	  
+	  //Mise-à-jour du linechart, de l'axe et du cadre
+	  line_chart.select(".line").attr("d", line);
+	  focus.select(".axis--x").call(xAxis);
+	  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+		  .scale((width - margin.right) / (s[1] - s[0]))
+		  .translate(-s[0], 0));
+		  
+	  //Filtrage des tornades selon les dates du nouvel intervalle pour affichage
+	  var newXExtent = s.map(xc.invert, xc);
+	  var newTornadoes = torn.filter(function (d){
+			return d.date_start >= newXExtent[0] && d.date_end <= newXExtent[1];
+		  });
+	  updateTorn(newTornadoes, meanTemp);
+	}
+
+	//Gestion des actions de zoom sur le graphique
+	function zoomed() {
+	  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+	  
+	  //Définition du nouveau domain en X
+	  var t = d3.event.transform;
+	  x.domain(t.rescaleX(xc).domain());
+	  
+	  //Mise-à-jour du linechart, de l'axe et du cadre
+	  line_chart.select(".line").attr("d", line);
+	  focus.select(".axis--x").call(xAxis);
+	  context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+	  
+	  //Filtrage des tornades selon les dates du nouvel intervalle pour affichage
+	  var newXExtent = t.rescaleX(xc).domain();
+	  var newTornadoes = torn.filter(function (d){
+			return d.date_start >= newXExtent[0] && d.date_end <= newXExtent[1];
+		  });
+	  updateTorn(newTornadoes, meanTemp);
+	}
+    
+  </script>
+</body>
