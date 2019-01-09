@@ -10,27 +10,41 @@ async function HurricaneProperty(svg) {
   let fromTime = '01/01/1100'
   let toTime = '01/01/9000'
   let currentTime = null
+  let famousHurricaneIDs = ['2005236N23285', '2012296N14283','2005289N18282']
+  let famousHurricanes = []
 
   async function loadAllData(from='01/01/1100', to='01/01/9000') {
 
-    if(fullData == null)
-      fullData = await getHurricaneData()
-      // fullData = (await loadCsv('json/storms.csv')).filter(rec=>rec.wind!='')
-    let data = cropPeriod(fullData, from, to)
-    data = nestById(data)
+    function parseData(data) {
 
-    data.forEach(hur => {
-      hur.name = hur.values[0].name
-      hur.beginTime = hur.values[0].timestamp/1000
-      hur.values.forEach(dat => dat.timeFromBegin = 
-        dat.timestamp/1000 - hur.beginTime
-      )
-      hur.timeLength = hur.values[hur.values.length-1].timeFromBegin
-      hur.winds = hur.values.map(val => {
-        return {wind:val.wind,time:val.timeFromBegin}
+      data = nestById(data)
+
+      data.forEach(hur => {
+        hur.name = hur.values[0].name
+        hur.beginTime = hur.values[0].timestamp/1000
+        hur.values.forEach(dat => dat.timeFromBegin = 
+          dat.timestamp/1000 - hur.beginTime
+        )
+        hur.timeLength = hur.values[hur.values.length-1].timeFromBegin
+        hur.winds = hur.values.map(val => {
+          return {wind:val.wind,time:val.timeFromBegin}
+        })
       })
-      //hur.winds = hur.winds.filter(val => val.wind != 0)
-    })
+
+      return data
+
+    }
+
+    if(fullData == null) {
+      fullData = await getHurricaneData()
+      famousHurricanes = await getHurricaneData()
+      famousHurricanes = parseData(famousHurricanes)
+      famousHurricanes = famousHurricanes.filter(dat => 
+        famousHurricaneIDs.indexOf(dat.key)>-1)
+    }
+
+    let data = cropPeriod(fullData, from, to)
+    data = parseData(data)
 
     function getWindSum(dat) {
       return dat.winds.reduce((a,b) =>({wind: a.wind + b.wind}),{wind:0}).wind
@@ -121,19 +135,19 @@ async function HurricaneProperty(svg) {
 
     function timeSpent(d) {
       if(d == 0)
-        return 'apparition'
+        return 'appearing'
       else if(d<60)
-        return d+' secondes'
+        return d+' seconds'
       else if(d < 60*60)
         return Math.floor(d/60) + ' minutes'
       else if(d < 60*60*24)
-        return Math.floor(d/60/60) + ' heures'
+        return Math.floor(d/60/60) + ' hours'
       else if(d < 60*60*24*7)
-        return Math.floor(d/60/60/24) + ' jours'
+        return Math.floor(d/60/60/24) + ' days'
       else if(d < 60*60*24*7*30)
-        return Math.floor(d/60/60/24/7) + ' semaines'
+        return Math.floor(d/60/60/24/7) + ' weeks'
       else if(d < 60*60*24*7*30*12)
-        return Math.floor(d/60/60/24/7/30) + ' mois'
+        return Math.floor(d/60/60/24/7/30) + ' months'
     }
 
     // --- axis
@@ -297,10 +311,7 @@ async function HurricaneProperty(svg) {
 
       // What to do when no selection ...
       if(fullHurricaneData.length > 10) {
-        dispData = [
-          fullHurricaneData[0],
-          fullHurricaneData[fullHurricaneData.length-1]
-        ]
+        dispData = famousHurricanes
       }
       else {
         dispData = fullHurricaneData
@@ -328,8 +339,9 @@ async function HurricaneProperty(svg) {
     let alreadySelected = selectedHurricanes.indexOf(hurId) > -1
     let inMap = hurricaneMap.hasOwnProperty(hurId)
 
-    if(alreadySelected)
+    if(alreadySelected) {
       EventEngine.triggerEvent(EventEngine.EVT.hurricaneUnselected, hurId)
+    }
     else if(inMap) {
       selectedHurricanes.push(hurId)
       updateView()
@@ -343,7 +355,7 @@ async function HurricaneProperty(svg) {
     let alreadySelected = index > -1
 
     if(alreadySelected) {
-      EventEngine.registerTo(EventEngine.EVT.hurricaneMouseExit, hurId)
+      EventEngine.triggerEvent(EventEngine.EVT.hurricaneMouseExit, hurId)
       selectedHurricanes.splice(index,1)
       updateView()
     }
