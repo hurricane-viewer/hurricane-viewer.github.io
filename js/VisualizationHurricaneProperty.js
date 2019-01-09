@@ -190,8 +190,8 @@ async function HurricaneProperty(svg) {
     names.enter()
       .append('text')
         .attr('font-family','sans-serif')
-        .attr('x',function(d,i){ return timeLengthScale(d.winds[0].time) + 5})
-        .attr('y',function(d,i){ return yScale(d.winds[0].wind) + 23})
+        .attr('x',function(d,i){ return leftMargin + 5})
+        .attr('y',function(d,i){ return i * 20})
         .attr('fill',function(d,i){ return colorScheme(i) })
         .text(function(d){ return d.name })
         .attr('opacity',0)
@@ -201,8 +201,8 @@ async function HurricaneProperty(svg) {
     names
         .transition()
         .attr('opacity', function(d){ return getOpacity(d.key)})
-        .attr('x',function(d,i){ return timeLengthScale(d.winds[0].time) + 5})
-        .attr('y',function(d,i){ return yScale(d.winds[0].wind) + 23})
+        .attr('x',function(d,i){ return leftMargin + 10})
+        .attr('y',function(d,i){ return i * 20})
 
     displayG.selectAll('path')
         .on('click', function(d) {
