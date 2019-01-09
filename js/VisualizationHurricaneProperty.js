@@ -19,11 +19,6 @@ async function HurricaneProperty(svg) {
     let data = cropPeriod(fullData, from, to)
     data = nestById(data)
 
-    hurricaneMap = {}
-    for(let i in data) {
-      hurricaneMap[data[i].key] = i
-    }
-
     data.forEach(hur => {
       hur.name = hur.values[0].name
       hur.beginTime = hur.values[0].timestamp/1000
@@ -37,7 +32,16 @@ async function HurricaneProperty(svg) {
       //hur.winds = hur.winds.filter(val => val.wind != 0)
     })
 
-    data = data.filter(dat => dat.winds.length > 0)
+    function getWindSum(dat) {
+      return dat.winds.reduce((a,b) =>({wind: a.wind + b.wind}),{wind:0}).wind
+    }
+
+    data = data.filter(dat => getWindSum(dat) > 0)
+
+    hurricaneMap = {}
+    for(let i in data) {
+      hurricaneMap[data[i].key] = i
+    }
 
     return data
   }
@@ -315,7 +319,9 @@ async function HurricaneProperty(svg) {
     let alreadySelected = selectedHurricanes.indexOf(hurId) > -1
     let inMap = hurricaneMap.hasOwnProperty(hurId)
 
-    if(!alreadySelected && inMap) {
+    if(alreadySelected)
+      EventEngine.triggerEvent(EventEngine.EVT.hurricaneUnselected, hurId)
+    else if(inMap) {
       selectedHurricanes.push(hurId)
       updateView()
     }
