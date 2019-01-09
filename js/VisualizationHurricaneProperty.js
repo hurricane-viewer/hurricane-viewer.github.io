@@ -104,7 +104,7 @@ async function HurricaneProperty(svg) {
   innerG.append("text")
     .attr("x", 15)
     .attr("y", bottomMargin)
-    .text("Wind intensity (node)")
+    .text("Wind intensity (knots)")
   innerG.append("text")
     .attr("x", width - 200)
     .attr("y", height - bottomMargin - 30)
