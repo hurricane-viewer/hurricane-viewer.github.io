@@ -16,6 +16,21 @@ svg {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
+select {
+  -webkit-appearance: none;
+  background: #fff url("data:image/svg+xml;charset=utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%204%205'%3E%3Cpath%20fill='%23667189'%20d='M2%200L0%202h4zm0%205L0%203h4z'/%3E%3C/svg%3E") no-repeat right .35rem center/.4rem .5rem;
+  padding-right: 1.2rem;
+  border: .05rem solid #bcc3ce;
+  border-radius: .1rem;
+  color: inherit;
+  font-size: .8rem;
+  height: 1.8rem;
+  line-height: 1.2rem;
+  outline: 0;
+  padding: .25rem .4rem;
+  text-transform: none;
+}
+
 /* ------------------------------------------------------------------ */
 /* --------------------------    DISPLAY   -------------------------- */
 
@@ -49,12 +64,21 @@ header {
   grid-area: gMap;
 }
 
-.geohurricane svg {
-  cursor: move;
+.geohurricane svg circle {
+  cursor: pointer;
+}
+
+.geohurricane .color-legend,
+.geohurricane svg text {
+  pointer-events: none;
 }
 
 .geohurricane .controls input {
-  width: 100%;
+  width: calc(100% - 150px);
+}
+
+.geohurricane .controls select {
+  float: right;
 }
 
 .geohurricane .land {
