@@ -94,8 +94,8 @@ async function GeoHurricane(svg) {
 		.attr('y', '3.5em')
 		.attr('class', 'mono')
 
-	let currentScale = 'wind'
-	setGeoColor('wind')
+	let currentScale = 'season'
+	setGeoColor('season')
 	function setGeoColor(type) {
 		if (type) {
 			switch (type) {
