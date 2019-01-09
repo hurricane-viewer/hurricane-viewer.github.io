@@ -135,19 +135,19 @@ async function HurricaneProperty(svg) {
 
     function timeSpent(d) {
       if(d == 0)
-        return 'apparition'
+        return 'appearing'
       else if(d<60)
-        return d+' secondes'
+        return d+' seconds'
       else if(d < 60*60)
         return Math.floor(d/60) + ' minutes'
       else if(d < 60*60*24)
-        return Math.floor(d/60/60) + ' heures'
+        return Math.floor(d/60/60) + ' hours'
       else if(d < 60*60*24*7)
-        return Math.floor(d/60/60/24) + ' jours'
+        return Math.floor(d/60/60/24) + ' days'
       else if(d < 60*60*24*7*30)
-        return Math.floor(d/60/60/24/7) + ' semaines'
+        return Math.floor(d/60/60/24/7) + ' weeks'
       else if(d < 60*60*24*7*30*12)
-        return Math.floor(d/60/60/24/7/30) + ' mois'
+        return Math.floor(d/60/60/24/7/30) + ' months'
     }
 
     // --- axis
