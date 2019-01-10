@@ -143,9 +143,9 @@ async function HurricaneProperty(svg) {
       else if(d < 60*60*24)
         return Math.floor(d/60/60) + ' hours'
       else if(d < 60*60*24*7)
-        return Math.floor(d/60/60/24) + ' day'
+        return Math.floor(d/60/60/24) + ' day(s)'
       else if(d < 60*60*24*7*30)
-        return Math.floor(d/60/60/24/7) + ' week'
+        return Math.floor(d/60/60/24/7) + ' week(s)'
       else if(d < 60*60*24*7*30*12)
         return Math.floor(d/60/60/24/7/30) + ' months'
     }
