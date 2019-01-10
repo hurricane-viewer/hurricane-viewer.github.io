@@ -94,7 +94,7 @@ function PlanetHeating(svg_param) {
 		.attr("id", "context");
 	focus = svg.append("g").attr("id", "focus");
 	line_chart = focus.append("g").attr("clip-path", "url(#clip)");
-	bars_chart = svg.append("g").attr("id", "bars");
+	bars_chart = focus.append("g").attr("id", "bars");
 	
 	
     //Noms des axes
@@ -275,7 +275,8 @@ function displayTemp(data) {
 //Gestion des données relatives aux ouragans, tornades...
 function displayTorn(data) {
   //Remonte la zone au premier plan (par-dessus rect.zoom) pour permettre les event mouse
-  bars_chart.raise();
+  focus.raise();
+  bars_chart.lower();
 
   //Affichage de l'histogramme
   addTorn(data);
@@ -309,6 +310,11 @@ function computeNbTornadoes(data) {
 	tornadoes.push(t);
   }
   
+  //Filtre par rapport aux données de températures
+  var tornadoes = tornadoes.filter(function (d){
+	  return d.date >= "1880";
+	});
+  
   return tornadoes;
 }
 
@@ -326,12 +332,32 @@ function addTorn(data) {
   //Affichage des rectangles
   bars_chart.selectAll("rect").data(data)
 	.enter().append("rect")
-	.style("fill", "none")
+	.style("fill", "white")
 	.style("stroke", "black")
 	.attr("width", function(d) { return xtorn.bandwidth(); })
 	.attr("height", function(d) { return ytorn(d.nb); })
 	.attr("x", function(d) { return xtorn(d.date); })
-	.attr("y",  function(d) { return height - ytorn(d.nb); });
+	.attr("y",  function(d) { return height - ytorn(d.nb); })
+      	
+	//Affichage d'un texte au survol
+	.on("mousemove", function(d) {
+	  //Coordonnées du curseur
+	  var mouse = d3.mouse(svg.node()).map(function(d) {
+		return parseInt(d);
+	  });
+	  
+	  //Suppresion du texte précédent (pouvant rester malgré mousout) et affichage du nouveau
+	  d3.select('#planetHeatingTooltip').remove();
+	  svg.append('text')
+		.attr('id', 'planetHeatingTooltip')
+		.attr('transform', "translate(" + (xtorn(d.date) + xtorn.bandwidth()/3) + "," + (height - ytorn(d.nb) - 10) + ")")
+		.text(d.nb);
+	})
+
+	//Disparition du texte
+	.on("mouseout", function() {
+		d3.select('#planetHeatingTooltip').remove();
+	});
 
 }
 
