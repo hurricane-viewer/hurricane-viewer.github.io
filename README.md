@@ -21,7 +21,7 @@ One can use this line chart to display and compare many hurricane's durations an
 
 ### Planet heating
 
-Can help to visualy search for correlation beetween our planet's temperature and the annual hurricanes count.
+Can help to visualy search for correlation between our planet's temperature and the annual hurricanes amount.
 
 ## DataSets
 
