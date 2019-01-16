@@ -6,10 +6,10 @@ async function GeoHurricane(svg) {
 
 	const startDate = new Date('01/01/1995')
 
-	const nbYearsToKeep = 10
+	const nbYearsToKeep = 25
 	const opacityChange = 1 / nbYearsToKeep
 
-	const playTimeStepMs = 12 * 60 *60 * 1000
+	const playTimeStepMs = 24 * 60 *60 * 1000
 	const playTimeInterval = 50
 
 	resize()
