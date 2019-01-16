@@ -50,15 +50,15 @@ async function GeoHurricane(svg) {
 
 	const colorScaleWind = d3.scaleLinear().domain([0, 140])
 		.interpolate(d3.interpolateHcl)
-		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+		.range([d3.rgb("#d9f0a3"), d3.rgb('#004529')])
 
 	const colorScaleSeason = d3.scaleSequential()
 		.domain([1, 12])
 		.interpolator(d3.interpolateRainbow)
 
-	const colorScalePressure = d3.scaleLinear().domain([920, 1025])
+	const colorScalePressure = d3.scaleLinear().domain([920, 1010])
 		.interpolate(d3.interpolateHcl)
-		.range([d3.rgb("#deebf7"), d3.rgb('#08306b')])
+		.range([d3.rgb("#ccebc5"), d3.rgb('#0868ac')])
 
 	const colorScalePopulation = d3.scaleLinear().domain([0, 10000000])
 		.interpolate(d3.interpolateHcl)
@@ -222,9 +222,7 @@ async function GeoHurricane(svg) {
 						.attr('id', 'hurricaneMouseOverTooltip')
 						.attr('transform', `translate(${projection([d.lon, d.lat])})`)
 						.append('tspan')
-						.text(d.name)
-						.append('tspan')
-						.text(d.time)
+						.text(`${d.name} - ${d.wind} knots ${d.pres}mb`)
 
 						EventEngine.triggerEvent(EventEngine.EVT.hurricaneMouseEnter, d)
 
