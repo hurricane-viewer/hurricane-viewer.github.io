@@ -56,9 +56,9 @@ async function GeoHurricane(svg) {
 		.domain([1, 12])
 		.interpolator(d3.interpolateRainbow)
 
-	const colorScaleYear = d3.scaleLinear().domain([1850, 2016])
+	const colorScalePressure = d3.scaleLinear().domain([920, 1025])
 		.interpolate(d3.interpolateHcl)
-		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+		.range([d3.rgb("#deebf7"), d3.rgb('#08306b')])
 
 	const colorScalePopulation = d3.scaleLinear().domain([0, 10000000])
 		.interpolate(d3.interpolateHcl)
@@ -109,9 +109,9 @@ async function GeoHurricane(svg) {
 					legendText.text('Season (month)')
 					break
 	
-				case 'year':
-					updateColorLegend(colorScaleYear)
-					legendText.text('Year')
+				case 'pressure':
+					updateColorLegend(colorScalePressure)
+					legendText.text('Pressure')
 					break
 			}
 			currentScale = type
@@ -132,10 +132,10 @@ async function GeoHurricane(svg) {
 					.attr('fill', d => colorScaleSeason(d.timestamp.getMonth()))
 				break
 
-			case 'year':
+			case 'pressure':
 				hurricanesPoints
 					.selectAll('circle')
-					.attr('fill', d => colorScaleYear(d.year))
+					.attr('fill', d => colorScalePressure(d.pres))
 				break
 		}
 	}
