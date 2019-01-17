@@ -346,11 +346,11 @@ function addTorn(data) {
 		return parseInt(d);
 	  });
 	  
-	  //Suppresion du texte précédent (pouvant rester malgré mousout) et affichage du nouveau
+	  //Suppresion du texte précédent (pouvant rester malgré mouseout) et affichage du nouveau
 	  d3.select('#planetHeatingTooltip').remove();
 	  svg.append('text')
 		.attr('id', 'planetHeatingTooltip')
-		.attr('transform', "translate(" + (xtorn(d.date) + xtorn.bandwidth()/3) + "," + (height - ytorn(d.nb) - 10) + ")")
+		.attr('transform', "translate(" + (xtorn(d.date) + xtorn.bandwidth()/2) + "," + (height - ytorn(d.nb) - 10) + ")")
 		.text(d.nb);
 	})
 
@@ -358,7 +358,6 @@ function addTorn(data) {
 	.on("mouseout", function() {
 		d3.select('#planetHeatingTooltip').remove();
 	});
-
 }
 
 

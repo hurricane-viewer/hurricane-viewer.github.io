@@ -6,10 +6,10 @@ async function GeoHurricane(svg) {
 
 	const startDate = new Date('01/01/1995')
 
-	const nbYearsToKeep = 10
+	const nbYearsToKeep = 25
 	const opacityChange = 1 / nbYearsToKeep
 
-	const playTimeStepMs = 12 * 60 *60 * 1000
+	const playTimeStepMs = 24 * 60 *60 * 1000
 	const playTimeInterval = 50
 
 	resize()
@@ -50,15 +50,15 @@ async function GeoHurricane(svg) {
 
 	const colorScaleWind = d3.scaleLinear().domain([0, 140])
 		.interpolate(d3.interpolateHcl)
-		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+		.range([d3.rgb("#d9f0a3"), d3.rgb('#004529')])
 
 	const colorScaleSeason = d3.scaleSequential()
 		.domain([1, 12])
 		.interpolator(d3.interpolateRainbow)
 
-	const colorScaleYear = d3.scaleLinear().domain([1850, 2016])
+	const colorScalePressure = d3.scaleLinear().domain([920, 1010])
 		.interpolate(d3.interpolateHcl)
-		.range([d3.rgb("#FFF500"), d3.rgb('#007AFF')])
+		.range([d3.rgb("#ccebc5"), d3.rgb('#0868ac')])
 
 	const colorScalePopulation = d3.scaleLinear().domain([0, 10000000])
 		.interpolate(d3.interpolateHcl)
@@ -109,9 +109,9 @@ async function GeoHurricane(svg) {
 					legendText.text('Season (month)')
 					break
 	
-				case 'year':
-					updateColorLegend(colorScaleYear)
-					legendText.text('Year')
+				case 'pressure':
+					updateColorLegend(colorScalePressure)
+					legendText.text('Pressure')
 					break
 			}
 			currentScale = type
@@ -132,10 +132,10 @@ async function GeoHurricane(svg) {
 					.attr('fill', d => colorScaleSeason(d.timestamp.getMonth()))
 				break
 
-			case 'year':
+			case 'pressure':
 				hurricanesPoints
 					.selectAll('circle')
-					.attr('fill', d => colorScaleYear(d.year))
+					.attr('fill', d => colorScalePressure(d.pres))
 				break
 		}
 	}
@@ -222,9 +222,7 @@ async function GeoHurricane(svg) {
 						.attr('id', 'hurricaneMouseOverTooltip')
 						.attr('transform', `translate(${projection([d.lon, d.lat])})`)
 						.append('tspan')
-						.text(d.name)
-						.append('tspan')
-						.text(d.time)
+						.text(`${d.name} - ${d.wind} knots ${d.pres}mb`)
 
 						EventEngine.triggerEvent(EventEngine.EVT.hurricaneMouseEnter, d)
 
