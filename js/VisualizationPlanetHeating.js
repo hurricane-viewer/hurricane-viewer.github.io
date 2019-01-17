@@ -115,6 +115,11 @@ function PlanetHeating(svg_param) {
       .attr("y", height - 15)
 	  .attr("class", "axis_title")
       .text("Years");
+    focus.append("text")
+      .attr("x", width - 173)
+      .attr("y", 10)
+	  .attr("class", "axis_title axis_title_right")
+	  .text("Number of hurricanes");
     
 		
 	clip = svg.append("defs").append("svg:clipPath")
