@@ -1,0 +1,5 @@
+Dans le texte: Analyse de ce que la viz nous apprend
+Mapper sur le deuxième graphe les moments où les ouragans atteingnent la côte
+Rajouter l'échelle pour le dernier graphe
+
+Faire le README (expliquer le problème du shutdown)
