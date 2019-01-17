@@ -11,7 +11,7 @@ This project propose to visualise our planet's hurricanes evolution through time
 
 <p align="center">
  <a target="blank" href="https://www.youtube.com/embed/ntWEZHpzz28">
-  <img src="/img/Thumbnail.png" height=250>
+  <img src="/img/ThumbnailYoutube.png" height=250>
  </a>
 </p>
 
