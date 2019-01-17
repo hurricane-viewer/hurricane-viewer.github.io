@@ -6,10 +6,10 @@ async function GeoHurricane(svg) {
 
 	const startDate = new Date('01/01/1995')
 
-	const nbYearsToKeep = 25
+	const nbYearsToKeep = 10
 	const opacityChange = 1 / nbYearsToKeep
 
-	const playTimeStepMs = 24 * 60 *60 * 1000
+	const playTimeStepMs = 18 * 60 *60 * 1000
 	const playTimeInterval = 50
 
 	resize()
@@ -307,6 +307,15 @@ async function GeoHurricane(svg) {
 				.attr('width', d => Math.sqrt(d.population) / 1000)
 				.attr('height', d => Math.sqrt(d.population) / 1000)
 				.attr('fill', d => colorScalePopulation(d.population))
+				.on('mouseover', d => {
+					map.append('text')
+					.attr('id', 'cityMouseOverTooltip')
+					.attr('transform', `translate(${projection([d.longitude, d.latitude])})`)
+					.text(`${d.name} - ${d.population} inhabitants`)
+				})
+				.on('mouseout', _ => {
+					d3.select('#cityMouseOverTooltip').remove()
+				})
 	})
 
 	// Resize svg to window
