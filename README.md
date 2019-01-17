@@ -9,7 +9,12 @@
 
 This project propose to visualise our planet's hurricanes evolution through time and space from 1842 to 2016.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ntWEZHpzz28" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<p align="center">
+ <a target="blank" href="https://www.youtube.com/embed/ntWEZHpzz28">
+  <img src="/img/Thumbnail.png" height=250>
+ </a>
+</p>
+
 
 ## Visualisations
 
