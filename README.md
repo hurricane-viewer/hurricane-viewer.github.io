@@ -11,7 +11,7 @@ This project propose to visualise our planet's hurricanes evolution through time
 
 <p align="center">
  <a target="blank" href="https://www.youtube.com/embed/ntWEZHpzz28">
-  <img src="/img/Thumbnail.png" height=250>
+  <img src="/img/ThumbnailYoutube.png" height=250>
  </a>
 </p>
 
@@ -36,7 +36,9 @@ This project is based on the National Oceanic and Atmospheric Administration (NO
 
  * [IBTrACS](https://www.ncdc.noaa.gov/ibtracs/) (International Best Track Archives Climate Stewardhship). This DataSet provides wind intensity and pressure mesures for each hurricane
  
- * [Billions](https://www.ncdc.noaa.gov/billions) DataSet. This DataSet 
+ * [Billions](https://www.ncdc.noaa.gov/billions) DataSet. This DataSet provides informations about human and material damage.
+ 
+ * [GTTS](https://datahub.io/core/global-temp) Global Temperature Time Series DataSet. This DataSet provides informations about our eath's planet through time.
  
  
 Due to an unexpected shutdown from the U.S. Government, all DataSets from the NOAA administration are unavailable at this date.
