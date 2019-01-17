@@ -34,6 +34,8 @@ var yAxis = d3.axisLeft().scale(y);
 //Echelle ordinale en X et linéaire en Y (nombre d'ouragans)
 var xtorn =  d3.scaleBand().range([0, width - margin.right]);
 var ytorn =  d3.scaleLinear().range([0, height]);
+var yt =  d3.scaleLinear().range([0, height]);
+var ytAxis = d3.axisRight().scale(yt);
 
 
 /**/
@@ -178,6 +180,7 @@ function createChart(error, temperatures, tornadoes) {
   
   xtorn.domain(nb_tornadoes.map(function(d) { return d.date; }));
   ytorn.domain([0, d3.max(nb_tornadoes, function(d) { return d.nb; })]);
+  yt.domain([d3.max(nb_tornadoes, function(d) { return d.nb; }), 0]);
   
   torn = nb_tornadoes;
   
@@ -194,6 +197,10 @@ function createChart(error, temperatures, tornadoes) {
 	.attr("class", "axis axis--y")
 	.attr("transform", "translate(0,0)")
 	.call(yAxis);
+  focus.append("g")
+	.attr("class", "axis axis--y")
+	.attr("transform", "translate(" + (width - margin.right) + ", 0)")
+	.call(ytAxis);
   context.append("g")
 	.attr("class", "axis axis--x")
 	.attr("transform", "translate(0," + height2 + ")")
