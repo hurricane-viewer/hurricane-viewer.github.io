@@ -46,15 +46,16 @@
       <div class="informations">
         
         <p>
-          A Visualization of hurricanes trajectories in the world
+          A Visualization of hurricanes trajectories in the world using data from :
         </p>
 
         <ul>
             <li>
-            Data from the National Oceanic and Atmospheric Administration's project IBTrACS contain hurricanes from 1842 through 2016. The slider below controls the date from wich to start drawing hurricanes.
+              National Oceanic and Atmospheric Administration's project IBTrACS containing 
+              hurricanes and weather data from 1842.
             </li>
             <li>
-            Temperature data come from <a href="https://datahub.io/core/global-temp">datahub.io</a>, a site specializing in the sharing of data.
+              Global Temperature Time Series from datahub.io including global monthly surface temprature mean.
             </li>
         </ul>
 
@@ -67,6 +68,17 @@
     <!-- GEO HURRICANE !-->
     <div class="geohurricane dataviz">
       <h2>Geo Hurricane</h2>
+
+      <p class="description">
+        The GeoHurricane visualization allows you to view hurricanes and typhoons progression throughout the years.
+        Zoom and pan using your cursor, and select the hurricane property you want to visualize using the bottom left
+        dropdown menu. <br><br>
+
+        With the seasons visualization, we can observe that the northern and southern hemispheres weather events
+        occurs in differents seasons.
+        
+      </p>
+
       <div id="color-legend" class="color-legend"></div>
       <div id='geohurricane'></div>
       <div class="controls">
@@ -88,8 +100,8 @@
       <h2>Hurricane Winds</h2>
 
         <p class="description">
-          Click on one hurricane trajectory point above to add the hurricane to the chart below and compare it's winds to other hurricanes.
-          Hurricane can be removed by clicking on the line to remove below.
+          Click on one hurricane trajectory point above to add the hurricane to the chart below and compare its
+          winds to other hurricanes. Hurricanes can be removed by simply clicking on them.
         </p>
 
     </div>
@@ -119,12 +131,30 @@
     <footer>
       
       <hr>
+      <h2>About</h2>
+
+      <p>
+        Educational project as part of the DataViz course
+
+        <ul>
+          <li><a href="https://lyondataviz.github.io/teaching/lyon1-m2/2018/">DataViz Course</a></li>
+          <li><a href="http://master-info.univ-lyon1.fr/IA/">Master 2 Artificial Intelligence</a></li>
+          <li><a href="https://www.univ-lyon1.fr/">Université Claude Bernard Lyon 1</a></li>
+        </ul>
+      </p>
+
       <h3>Authors</h3>
       <ul>
           <li>Hugo Castaneda</li>
           <li>Etienne Lefebvre</li>
           <li>Gauthier Magnin</li>
           <li>Adrien Jarretier-Yuste</li>
+      </ul>
+
+      <h3>Sources</h3>
+      <ul>
+        <li><a href="https://www.ncdc.noaa.gov/ibtracs/">IBTrACS - National Climatic Data Center - NOAA</a></li>
+        <li><a href="https://datahub.io/core/global-temp">Global Temperature Time Series - Datahub.io</a></li>
       </ul>
       <hr>
 
