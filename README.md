@@ -5,7 +5,7 @@
  * Gautier MAGNIN
  * Adrien JARRETIER-YUSTE
  
-## Project point
+## Project purpose
 
 This project propose to visualise our planet's hurricanes evolution through time and space from 1842 to 2016.
 
