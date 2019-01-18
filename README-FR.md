@@ -30,19 +30,19 @@ Cette série temporelle peut être utilisée pour afficher et comparer plusieurs
 
 Peut aider à rechercher visuellement une corrélation entre la température moyenne de la planète et la quantité annuelle d'ouragans.
 
-## DataSets
+## Jeux de données
 
-This project is based on the National Oceanic and Atmospheric Administration (NOAA) DataSets.
+Ce projet est basé sur les données de l'administration océanique et atmosphérique natiionale des Etats-Unis (NOAA).
 
- * [IBTrACS](https://www.ncdc.noaa.gov/ibtracs/) (International Best Track Archives Climate Stewardhship). This DataSet provides wind intensity and pressure mesures for each hurricane
+ * [IBTrACS](https://www.ncdc.noaa.gov/ibtracs/) (International Best Track Archives Climate Stewardhship). Ce jeu de données donne l'intensité des vents et les mesures de pression.
  
- * [Billions](https://www.ncdc.noaa.gov/billions) DataSet. This DataSet provides informations about human and material damage.
+ * [Billions](https://www.ncdc.noaa.gov/billions) DataSet. Informations dur les dommages matériels et humains.
  
- * [GTTS](https://datahub.io/core/global-temp) Global Temperature Time Series DataSet. This DataSet provides informations about our eath's planet through time.
+ * [GTTS](https://datahub.io/core/global-temp) Global Temperature Time Series DataSet. Données sur la température de notre planète au cours du temps.
  
  
-Due to an unexpected shutdown from the U.S. Government, all DataSets from the NOAA administration are unavailable at this date.
+A cause d'une fermeture inattendue par le gouvernement américain, les jeux de données du NOAA sont indisponible à cette date.
  
-## Additional links
+## Liens additionnels
 
- * [hurricane-viewer.github.io](https://hurricane-viewer.github.io/) Website deployed from this repository
+ * [hurricane-viewer.github.io](https://hurricane-viewer.github.io/) Site web déployé depuis ce dépôt.
